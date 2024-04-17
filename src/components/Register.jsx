@@ -28,7 +28,7 @@ const Register = () => {
         
         <button className='w-full mb-4 text-[18px] mt-6 rounded-full bg-white text-black hover:bg-orange-700 hover:text-white py-2 transition-colors duration-300' type='submit'>Register</button>
         <div>
-          <span className='m-4'>Already Created an Account? <Link className='text-orange-700'to='/Login'>Login</Link></span>
+          <span className='m-4'>Already Created an Account? <Link className='text-orange-700'to='/'>Login</Link></span>
         </div>
       </form>
     </div>
