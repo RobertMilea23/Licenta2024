@@ -29,7 +29,7 @@ const Login = () => {
           </div>
           <button className='w-full mb-4 text-[18px] mt-6 rounded-full bg-white text-black hover:bg-orange-700 hover:text-white py-2 transition-colors duration-300' type='submit'>Login</button>
           <div>
-            <span className='m-4'>New Here? <Link className='text-orange-700'to='/Register'>Create an Account</Link></span>
+            <span className='m-4'>New Here? <Link className='text-orange-700'to='/register'>Create an Account</Link></span>
           </div>
         </form>
       </div>
