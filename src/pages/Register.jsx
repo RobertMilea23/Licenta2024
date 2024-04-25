@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom'
 import {BiUser} from "react-icons/bi"
 import {AiOutlineUnlock} from "react-icons/ai"
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'
+import backgroundImage from '../assets/COVER_IMAGE.jfif'
 
 const Register = () => {
 
@@ -11,21 +13,30 @@ const Register = () => {
   const[email, setEmail] = useState();
   const[password, setPasssword] = useState();
   const[confirmPass, setConfirmPass] = useState();
+  const[error, setError] = useState(); 
+  const navigate = useNavigate();
 
 
   const handleSubmit = (e) => {
+   
     e.preventDefault()
-    axios.post('http://localhost:3000/Register', {email, password, confirmPass})
-    .then(result => console.log(result))
+    if(password === confirmPass){
+    axios.post('http://localhost:3005/Register', {email, password, confirmPass})
+    .then(result => {console.log(result)
+    navigate('/Login')
+    })
     .catch(err => console.log(err))
+    }else{
+      setError('Passwords do not match')
+    }
   }
 
 
 
-
   return (
-    <div>
+    <div className='text-white h-[100vh] flex justify-center items-center bg-cover' style={{ backgroundImage: `url(${backgroundImage})` }}>
     <div className='bg-slate-800 border border-slate-400 rounded-md p-8 shadow-lg backdrop-filter backdrop-blur-sm bg-opacity-30 relative'> 
+      <div className='text-orange-700'>{error}</div>
       <h1 className='text-4xl text-whitefont-bold text-center mb-6'>Register</h1>
       <form onSubmit={handleSubmit}>
         <div className='relative my-4'>

@@ -1,24 +1,26 @@
 import React from 'react'
-import Login from './components/Login'
+import Login from './pages/Login'
 import backgroundImage from './assets/COVER_IMAGE.jfif'; 
 import {Route, Routes} from 'react-router-dom'
-import Register from './components/Register'
+import Register from './pages/Register'
+import { Navigate } from 'react-router-dom';
+import Home from './pages/Home'
 
 
 const App = () => {
+
+
   return (
     <>
-    
-    <div className='text-white h-[100vh] flex justify-center items-center bg-cover' style={{ backgroundImage: `url(${backgroundImage})`  }}>
-        <Routes>
-          <Route path='Login' element={ <Login />}/>
-          <Route path='Register' element={ <Register />}/>
-        </Routes>
-    </div>
-    </>
       
-
-    
+        <Routes>
+          <Route path='/' element={<Navigate to='/Login' />} />
+          <Route path='/Login' element={<Login />} />
+          <Route path='/Register' element={<Register />} />
+          <Route path='/Home' element={<Home />} />
+        </Routes>
+      
+    </>
   )
 }
 
