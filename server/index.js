@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect("mongodb+srv://milearobert21:robstud2003@licenta2024.vjkjbpf.mongodb.net/users")
+mongoose.connect("mongodb+srv://milearobert21:robstud2003@licenta2024.vjkjbpf.mongodb.net/managingBasketballApp")
     .then(() => {
         console.log("Connected to the database");
     })

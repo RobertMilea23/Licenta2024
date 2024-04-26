@@ -10,7 +10,6 @@ import { Button } from '../components/ui/button'
 import backgroundImage from '../assets/COVER_IMAGE.jfif'
 
 
-
   const Login = () => {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
@@ -30,14 +29,14 @@ import backgroundImage from '../assets/COVER_IMAGE.jfif'
       }
     })
     .catch(err => console.log(err))
-    
+    setError('Invalid Credentials')
   }
 
 
 
   return (
     <div className='text-white h-[100vh] flex justify-center items-center bg-cover' style={{ backgroundImage: `url(${backgroundImage})` }}>
-
+     
       
       <div className='bg-slate-800 border border-slate-400 rounded-md p-8 shadow-lg backdrop-filter backdrop-blur-sm bg-opacity-30 relative'> 
         <div className='text-orange-700'>{error}</div>
@@ -59,13 +58,13 @@ import backgroundImage from '../assets/COVER_IMAGE.jfif'
           <div className='flex justify-between items-center'>
               <div className='flex gap-2 items-center'>
                   <Checkbox className='peer' />
-                  <label htmlFor='checkbox'>Remember Me</label>
+                  <label >Accept Terms & Conditions</label>
               </div>
-              <Link to='' className='text-orange-700'>Forgot Password?</Link>
+              {/* <Link to='' className='text-orange-700'>Forgot Password?</Link> */}
           </div>
-          <button className='w-full mb-4 text-[18px] mt-6 rounded-full bg-white text-black hover:bg-orange-700 hover:text-white py-2 transition-colors duration-300' type='submit'>Login</button>
+          <button className='w-full mb-4 text-[18px] mt-6 rounded-full bg-white text-black hover:bg-orange-500 hover:text-white py-2 transition-colors duration-300' type='submit'>Login</button>
           <div>
-            <span className='m-4'>New Here? <Link className='text-orange-700'to='/Register'>Create an Account</Link></span>
+            <span className='m-4'>New Here? <Link className='text-orange-500'to='/Register'>Create an Account</Link></span>
           </div>
           
         </form>
