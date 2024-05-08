@@ -1,15 +1,40 @@
 import React from 'react'
+import axios from 'axios'
 import { Link } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
-import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet"
 import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu"
 import { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from '../components/ui/card'
 import { Input } from "../components/ui/input"
 import { Label } from "../components/ui/label"
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../components/ui/select" 
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const Players = () => {
+
+
+  const [name, setName] = useState();
+  const [position, setPosition] = useState();
+  const navigate = useNavigate();
+  const [isPlayer, setIsPlayer] = useState(false);
+  
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    axios.post('http://localhost:3005/Players', {name, position})
+    .then(result => {console.log(result)
+      navigate('/Home')
+    })
+    .catch(err => console.log(err))
+    
+  }
+
+
+
   return (
+
+
+
+
   <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
         <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
@@ -71,41 +96,43 @@ const Players = () => {
 
 
     <div className="flex-1 p-4 md:p-6 lg:p-8 flex">
-        <Card className="w-[600px] h-[450px]">
-          <CardHeader>
-            <CardTitle>Choose your playstyle!</CardTitle>
-            <CardDescription>Decide what you want to be on the court</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form>
-              <div className="grid w-full items-center gap-4">
-                <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="name">Jersey NAME</Label>
-                  <Input id="name" placeholder="Name on your jersey" />
-                </div>
-                <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="Position">Your wanted position</Label>
-                  <Select>
-                    <SelectTrigger id="position">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent position="popper">
-                      <SelectItem value="PG">PG-Point Guard</SelectItem>
-                      <SelectItem value="SG">SG-Shooting Guard</SelectItem>
-                      <SelectItem value="SF">SF-Small Forward</SelectItem>
-                      <SelectItem value="PF">PF-Power Forward</SelectItem>
-                      <SelectItem value="C">C-Center</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </form>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button>GO!</Button>
-          </CardFooter>
-        </Card>
-    </div>
+  <Card className="w-[600px] h-[450px]">
+    <CardHeader>
+      <CardTitle>Choose your playstyle!</CardTitle>
+      <CardDescription>Decide what you want to be on the court</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <form className="flex justify-between flex-col gap-8" onSubmit={handleSubmit}>
+        <div className="grid w-full items-center gap-4">
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="name">Jersey NAME</Label>
+            <Input id="name" placeholder="Name on your jersey" onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="position">Your wanted position</Label>
+            <Select onValueChange={(selectedValue) => setPosition(selectedValue)}>
+              <SelectTrigger id="position">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectItem value="PG">PG-Point Guard</SelectItem>
+                <SelectItem value="SG">SG-Shooting Guard</SelectItem>
+                <SelectItem value="SF">SF-Small Forward</SelectItem>
+                <SelectItem value="PF">PF-Power Forward</SelectItem>
+                <SelectItem value="C">C-Center</SelectItem>
+              </SelectContent>
+            </Select>
+
+          </div>
+        </div>
+        
+        <Button className=" w-1/4 "type='submit' >GO!</Button>
+    
+      </form>
+    </CardContent>
+    
+  </Card>
+</div>
     
   </div>
     
