@@ -6,7 +6,9 @@ import Register from './pages/Register'
 import { Navigate } from 'react-router-dom';
 import Home from './pages/Home'
 import Games from './pages/Games'
-
+import Teams from './pages/Teams'
+import Players from './pages/Players';
+import Stats from './pages/Stats';
 
 const App = () => {
 
@@ -20,6 +22,9 @@ const App = () => {
         <Route path='/Register' element={<Register />} />
         <Route path='/Home' element={<Home />} />
         <Route path='/Games' element={<Games />} />
+        <Route path='/Teams' element={<Teams />} />
+        <Route path='/Players' element={<Players />} />
+        <Route path='/Stats' element={<Stats />} />
       </Routes>
 
    
