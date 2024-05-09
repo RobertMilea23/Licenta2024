@@ -40,12 +40,29 @@ app.post('/Register', (req, res) => {
 });
 
 
+
+
+
 app.post('/Players', (req, res) => {
     const { name, position } = req.body;
     playerModel.create(req.body)
-        .then(players => res.json(users))
+        .then(players => res.json(players))
         .catch(err => res.json(err));
 });
+
+
+app.get('/countPlayers', (req, res) => {
+    playerModel.countDocuments({})
+        .then(count => {
+            res.json({ count });
+        })
+        .catch(err => {
+            console.error("Error fetching player count:", err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        });
+});
+
+
 
 app.listen(3005, () => {
     console.log("server is running");

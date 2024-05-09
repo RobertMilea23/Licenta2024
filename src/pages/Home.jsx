@@ -6,11 +6,34 @@ import { Input } from "@/components/ui/input"
 import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu"
 import { CardTitle, CardHeader, CardContent, Card, CardDescription } from "@/components/ui/card"
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@/components/ui/table"
+import { useState } from 'react'
+import { useEffect } from 'react'
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { SelectValue, SelectTrigger, SelectLabel, SelectItem, SelectGroup, SelectContent, Select } from "@/components/ui/select"
+import axios from 'axios'
 
 export default function Home() {
+
+  const [totalPlayers, setTotalPlayers] = useState(0);
+
+  useEffect(() => {
+    axios.get('http://localhost:3005/countPlayers')
+      .then(result => {
+          console.log('Data received:', result.data);
+          setTotalPlayers(result.data.count);
+          
+      })
+      .catch(err => {
+          console.log('Error fetching data:', err);
+      });
+}, []);
+
+
+console.log(totalPlayers);
+
+  
+
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
@@ -22,21 +45,18 @@ export default function Home() {
           <Link className="text-foreground transition-colors hover:text-foreground" to="/Home">
             Dashboard
           </Link>
-          <Link className="text-foreground transition-colors hover:text-foreground" to="/Home">
-          Dashboard
-        </Link>
-        <Link className="text-muted-foreground transition-colors hover:text-foreground"  to="/Games">
-          Games
-        </Link>
-        <Link className="text-muted-foreground transition-colors hover:text-foreground" to='/Teams'>
-          Teams
-        </Link>
-        <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Players">
-          Players
-        </Link>
-        <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Stats">
-          Stats
-        </Link>
+          <Link className="text-muted-foreground transition-colors hover:text-foreground"  to="/Games">
+            Games
+          </Link>
+          <Link className="text-muted-foreground transition-colors hover:text-foreground" to='/Teams'>
+            Teams
+          </Link>
+          <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Players">
+            Players
+          </Link>
+          <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Stats">
+            Stats
+          </Link>
         </nav>
         <Sheet>
           <SheetTrigger asChild>
@@ -126,7 +146,7 @@ export default function Home() {
               <UsersIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">512</div>
+              <div className="text-2xl font-bold">{totalPlayers}</div>
               <p className="text-xs text-muted-foreground">Total players</p>
             </CardContent>
           </Card>

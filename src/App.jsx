@@ -9,6 +9,7 @@ import Games from './pages/Games'
 import Teams from './pages/Teams'
 import Players from './pages/Players';
 import Stats from './pages/Stats';
+import PlayersCreated from './pages/PlayersCreated';
 
 const App = () => {
 
@@ -25,6 +26,7 @@ const App = () => {
         <Route path='/Teams' element={<Teams />} />
         <Route path='/Players' element={<Players />} />
         <Route path='/Stats' element={<Stats />} />
+        <Route path='/PlayersCreated' element={<PlayersCreated />} />
       </Routes>
 
    

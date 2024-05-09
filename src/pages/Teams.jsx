@@ -1,9 +1,15 @@
 import React from 'react'
+import axios from 'axios'
 import { Link } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
-import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet"
-import { Input } from "@/components/ui/input"
 import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu"
+import { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from '../components/ui/card'
+import { Input } from "../components/ui/input"
+import { Label } from "../components/ui/label"
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../components/ui/select" 
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { set } from 'mongoose'
 const Teams = () => {
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -29,37 +35,7 @@ const Teams = () => {
           Stats
         </Link>
       </nav>
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button className="shrink-0 md:hidden" size="icon" variant="outline">
-            <MenuIcon className="h-5 w-5" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left">
-          <nav className="grid gap-6 text-lg font-medium">
-            <Link className="flex items-center gap-2 text-lg font-semibold" href="#">
-              <ShoppingBasketIcon className="h-6 w-6" />
-              <span className="sr-only">Basketball Community</span>
-            </Link>
-            <Link className="hover:text-foreground" href="#">
-              Dashboard
-            </Link>
-            <Link className="text-muted-foreground hover:text-foreground" href="#">
-              Games
-            </Link>
-            <Link className="text-muted-foreground hover:text-foreground" href="#">
-              Teams
-            </Link>
-            <Link className="text-muted-foreground hover:text-foreground" href="#">
-              Players
-            </Link>
-            <Link className="text-muted-foreground hover:text-foreground" href="#">
-              Stats
-            </Link>
-          </nav>
-        </SheetContent>
-      </Sheet>
+      
       <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
         <form className="ml-auto flex-1 sm:flex-initial">
           <div className="relative">
@@ -89,6 +65,47 @@ const Teams = () => {
         </DropdownMenu>
       </div>
     </header>
+
+    <div className="flex-1 p-4 md:p-6 lg:p-8 flex">
+  <Card className="w-[600px] h-[450px]">
+    <CardHeader>
+      <CardTitle>Make Your Team!</CardTitle>
+      <CardDescription>Customize your dream team</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <form className="flex justify-between flex-col gap-8" >
+        <div className="grid w-full items-center gap-4">
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="name">Team NAME</Label>
+            <Input id="name" placeholder="Team Name" />
+          </div>
+          <div className="flex flex-col space-y-1.5">
+            <Label htmlFor="position">Your wanted position</Label>
+            <Select >
+              <SelectTrigger id="position">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectItem value="PG">PG-Point Guard</SelectItem>
+                <SelectItem value="SG">SG-Shooting Guard</SelectItem>
+                <SelectItem value="SF">SF-Small Forward</SelectItem>
+                <SelectItem value="PF">PF-Power Forward</SelectItem>
+                <SelectItem value="C">C-Center</SelectItem>
+              </SelectContent>
+            </Select>
+
+          </div>
+        </div>
+        
+        <Button className=" w-1/4 "type='submit' >GO!</Button>
+    
+      </form>
+    </CardContent>
+    
+  </Card>
+  </div>
+
+
     </div>
   )
 }
