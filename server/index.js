@@ -1,8 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const userModel = require("./models/User.js");
-const playerModel = require("./models/Player.js");
+const usersRoute = require("./routes/usersRoute.js");
+const playersRoute = require("./routes/playersRoute.js");
 
 const app = express();
 
@@ -17,53 +17,10 @@ mongoose.connect("mongodb+srv://milearobert21:robstud2003@licenta2024.vjkjbpf.mo
         console.log("Failed to connect to the database");
     });
 
-app.post('/Login', (req, res) => {
-    const { email, password } = req.body;
-    userModel.findOne({ email: email })
-        .then(user => {
-            if (user) {
-                if (user.password === password) {
-                    res.json('Login successful');
-                } else {
-                    res.json('Incorrect password');
-                }
-            } else {
-                res.json('User not found');
-            }
-        });
-});
-
-app.post('/Register', (req, res) => {
-    userModel.create(req.body)
-        .then(users => res.json(users))
-        .catch(err => res.json(err));
-});
-
-
-
-
-
-app.post('/Players', (req, res) => {
-    const { name, position, height } = req.body; // Include height in the destructuring
-    playerModel.create({ name, position, height }) // Pass height to create method
-        .then(players => res.json(players))
-        .catch(err => res.json(err));
-});
-
-
-app.get('/countPlayers', (req, res) => {
-    playerModel.countDocuments({})
-        .then(count => {
-            res.json({ count });
-        })
-        .catch(err => {
-            console.error("Error fetching player count:", err);
-            res.status(500).json({ error: 'Internal Server Error' });
-        });
-});
-
-
+// Use the routes
+app.use('/users', usersRoute);
+app.use('/players', playersRoute);
 
 app.listen(3005, () => {
-    console.log("server is running");
+    console.log("Server is running");
 });

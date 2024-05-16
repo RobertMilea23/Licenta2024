@@ -16,7 +16,7 @@ const Players = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post('http://localhost:3005/Players', { name, position, height }) // Include height in the request
+    axios.post('http://localhost:3005/players/Players', { name, position, height }) // Include height in the request
       .then(result => {
         console.log(result);
         navigate('/Home');

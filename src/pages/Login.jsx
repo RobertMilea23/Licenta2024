@@ -21,14 +21,15 @@ import backgroundImage from '../assets/COVER_IMAGE.jfif'
    
     e.preventDefault()
     
-    axios.post('http://localhost:3005/Login', {email, password})
+    axios.post('http://localhost:3005/users/Login', { email, password })
     .then(result => {
-      console.log(result)
-      if(result.data === 'Login successful'){
-        navigate('/Home')
-      }
+        console.log(result);
+        if (result.data === 'Login successful') {
+            navigate('/Home');
+        }
     })
-    .catch(err => console.log(err))
+    .catch(err => console.log(err));
+
     setError('Invalid Credentials')
   }
 

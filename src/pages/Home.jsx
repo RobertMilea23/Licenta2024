@@ -18,7 +18,7 @@ export default function Home() {
   const [totalPlayers, setTotalPlayers] = useState(0);
 
   useEffect(() => {
-    axios.get('http://localhost:3005/countPlayers')
+    axios.get('http://localhost:3005/players/countPlayers')
       .then(result => {
           console.log('Data received:', result.data);
           setTotalPlayers(result.data.count);

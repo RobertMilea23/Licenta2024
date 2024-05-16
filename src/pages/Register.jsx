@@ -21,7 +21,7 @@ const Register = () => {
    
     e.preventDefault()
     if(password === confirmPass){
-    axios.post('http://localhost:3005/Register', {email, password, confirmPass})
+    axios.post('http://localhost:3005/users/Register', {email, password, confirmPass})
     .then(result => {console.log(result)
     navigate('/Login')
     })
