@@ -11,6 +11,7 @@ import backgroundImage from '../assets/COVER_IMAGE.jfif'
 
 
   const Login = () => {
+
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [error, setError] = useState();
@@ -19,16 +20,17 @@ import backgroundImage from '../assets/COVER_IMAGE.jfif'
 
   const handleSubmit = (e) => {
    
-    e.preventDefault()
-    
+    e.preventDefault();
     axios.post('http://localhost:3005/users/Login', { email, password })
-    .then(result => {
-        console.log(result);
-        if (result.data === 'Login successful') {
-            navigate('/Home');
-        }
-    })
-    .catch(err => console.log(err));
+        .then(result => {
+            if (result.data.message === 'Login successful') {
+                localStorage.setItem('userId', result.data.user.id); // Store user ID in local storage
+                navigate('/Home');
+            } else {
+                setError(result.data);
+            }
+        })
+        .catch(err => console.log(err));
 
     setError('Invalid Credentials')
   }
