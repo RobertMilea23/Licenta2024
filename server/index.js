@@ -44,8 +44,8 @@ app.post('/Register', (req, res) => {
 
 
 app.post('/Players', (req, res) => {
-    const { name, position } = req.body;
-    playerModel.create(req.body)
+    const { name, position, height } = req.body; // Include height in the destructuring
+    playerModel.create({ name, position, height }) // Pass height to create method
         .then(players => res.json(players))
         .catch(err => res.json(err));
 });
