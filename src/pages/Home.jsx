@@ -6,33 +6,30 @@ import { Input } from "@/components/ui/input"
 import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu"
 import { CardTitle, CardHeader, CardContent, Card, CardDescription } from "@/components/ui/card"
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@/components/ui/table"
-import { useState } from 'react'
-import { useEffect } from 'react'
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { SelectValue, SelectTrigger, SelectLabel, SelectItem, SelectGroup, SelectContent, Select } from "@/components/ui/select"
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 
 export default function Home() {
-
   const [totalPlayers, setTotalPlayers] = useState(0);
+  const [totalTeams, setTotalTeams] = useState(0);
 
   useEffect(() => {
     axios.get('http://localhost:3005/players/countPlayers')
       .then(result => {
-          console.log('Data received:', result.data);
-          setTotalPlayers(result.data.count);
-          
+        setTotalPlayers(result.data.count);
       })
       .catch(err => {
-          console.log('Error fetching data:', err);
+        console.log('Error fetching player count:', err);
       });
-}, []);
 
-
-console.log(totalPlayers);
-
-  
+    axios.get('http://localhost:3005/teams/countTeams')
+      .then(result => {
+        setTotalTeams(result.data.count);
+      })
+      .catch(err => {
+        console.log('Error fetching team count:', err);
+      });
+  }, []);
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -45,7 +42,7 @@ console.log(totalPlayers);
           <Link className="text-foreground transition-colors hover:text-foreground" to="/Home">
             Dashboard
           </Link>
-          <Link className="text-muted-foreground transition-colors hover:text-foreground"  to="/Games">
+          <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Games">
             Games
           </Link>
           <Link className="text-muted-foreground transition-colors hover:text-foreground" to='/Teams'>
@@ -136,7 +133,7 @@ console.log(totalPlayers);
               <UsersIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">32</div>
+              <div className="text-2xl font-bold">{totalTeams}</div>
               <p className="text-xs text-muted-foreground">Total teams</p>
             </CardContent>
           </Card>

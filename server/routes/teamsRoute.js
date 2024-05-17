@@ -15,4 +15,16 @@ router.post('/create', (req, res) => {
         .catch(err => res.status(500).json(err));
 });
 
+// Count teams route
+router.get('/countTeams', (req, res) => {
+    teamModel.countDocuments({})
+        .then(count => {
+            res.json({ count });
+        })
+        .catch(err => {
+            console.error("Error fetching team count:", err);
+            res.status(500).json({ error: 'Internal Server Error' });
+        });
+});
+
 module.exports = router;
