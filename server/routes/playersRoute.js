@@ -23,5 +23,13 @@ router.get('/countPlayers', (req, res) => {
 });
 
 
+// Fetch all players route (nou)
+router.get('/allPlayers', (req, res) => {
+    playerModel.find({})
+        .then(players => res.json(players))
+        .catch(err => res.status(500).json(err));
+});
+
+
 
 module.exports = router;

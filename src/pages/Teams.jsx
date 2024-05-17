@@ -10,107 +10,182 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from ".
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { set } from 'mongoose'
+import { useEffect } from 'react'
+
+
 const Teams = () => {
+  const [teamName, setTeamName] = useState('');
+  const [selectedPlayers, setSelectedPlayers] = useState([]);
+  const [players, setPlayers] = useState([]);
+  const [filteredPlayers, setFilteredPlayers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+      axios.get('http://localhost:3005/players/allPlayers')
+          .then(response => {
+              setPlayers(response.data);
+              setFilteredPlayers(response.data);
+          })
+          .catch(err => console.error(err));
+  }, []);
+
+  const handleSearchChange = (e) => {
+      setSearchTerm(e.target.value);
+      if (e.target.value === '') {
+          setFilteredPlayers(players);
+      } else {
+          const filtered = players.filter(player =>
+              player.name.toLowerCase().includes(e.target.value.toLowerCase())
+          );
+          setFilteredPlayers(filtered);
+      }
+  };
+
+  const handlePlayerSelect = (player) => {
+      if (!selectedPlayers.some(p => p._id === player._id)) {
+          setSelectedPlayers(prev => [...prev, player]);
+      }
+      setSearchTerm('');
+      setFilteredPlayers(players);
+  };
+
+  const handlePlayerRemove = (player) => {
+      setSelectedPlayers(prev => prev.filter(p => p._id !== player._id));
+  };
+
+  const handleSubmit = (event) => {
+      event.preventDefault();
+      const playerIds = selectedPlayers.map(player => player._id);
+      axios.post('http://localhost:3005/teams/create', { teamName, players: playerIds })
+          .then(response => {
+              console.log(response.data);
+              navigate('/Teams');
+          })
+          .catch(err => console.error(err));
+  };
+
   return (
-    <div className="flex min-h-screen w-full flex-col">
-    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-      <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-        <Link className="flex items-center gap-2 text-lg font-semibold md:text-base" href="#">
-          <ShoppingBasketIcon className="h-6 w-6" />
-          <span className="sr-only">Basketball Community</span>
-        </Link>
-        <Link className="text-foreground transition-colors hover:text-foreground" to="/Home">
-          Dashboard
-        </Link>
-        <Link className="text-muted-foreground transition-colors hover:text-foreground"  to="/Games">
-          Games
-        </Link>
-        <Link className="text-muted-foreground transition-colors hover:text-foreground" to='/Teams'>
-          Teams
-        </Link>
-        <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Players">
-          Players
-        </Link>
-        <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Stats">
-          Stats
-        </Link>
-      </nav>
-      
-      <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
-        <form className="ml-auto flex-1 sm:flex-initial">
-          <div className="relative">
-            {/* <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
-              placeholder="Search teams, players, games..."
-              type="search"
-            /> */}
+      <div className="flex min-h-screen w-full flex-col">
+          <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+              <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+                  <Link className="flex items-center gap-2 text-lg font-semibold md:text-base" to="#">
+                      <ShoppingBasketIcon className="h-6 w-6" />
+                      <span className="sr-only">Basketball Community</span>
+                  </Link>
+                  <Link className="text-foreground transition-colors hover:text-foreground" to="/Home">
+                      Dashboard
+                  </Link>
+                  <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Games">
+                      Games
+                  </Link>
+                  <Link className="text-muted-foreground transition-colors hover:text-foreground" to='/Teams'>
+                      Teams
+                  </Link>
+                  <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Players">
+                      Players
+                  </Link>
+                  <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Stats">
+                      Stats
+                  </Link>
+              </nav>
+
+              <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+                  <form className="ml-auto flex-1 sm:flex-initial">
+                      <div className="relative">
+                          {/* <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <Input
+                              className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
+                              placeholder="Search teams, players, games..."
+                              type="search"
+                          /> */}
+                      </div>
+                  </form>
+                  <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                          <Button className="rounded-full" size="icon" variant="secondary">
+                              <UserCircleIcon className="h-5 w-5" />
+                              <span className="sr-only">Toggle user menu</span>
+                          </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>Settings</DropdownMenuItem>
+                          <DropdownMenuItem>Support</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>Logout</DropdownMenuItem>
+                      </DropdownMenuContent>
+                  </DropdownMenu>
+              </div>
+          </header>
+
+          <div className="flex-1 p-4 md:p-6 lg:p-8 flex justify-center items-center">
+              <Card className="w-[600px] h-auto">
+                  <CardHeader>
+                      <CardTitle>Make Your Team!</CardTitle>
+                      <CardDescription>Customize your dream team</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      <form className="flex justify-between flex-col gap-8" onSubmit={handleSubmit}>
+                          <div className="grid w-full items-center gap-4">
+                              <div className="flex flex-col space-y-1.5">
+                                  <Label htmlFor="teamName">Team Name</Label>
+                                  <Input
+                                      id="teamName"
+                                      value={teamName}
+                                      onChange={(e) => setTeamName(e.target.value)}
+                                      placeholder="Team Name"
+                                  />
+                              </div>
+                              <div className="flex flex-col space-y-1.5">
+                                  <Label htmlFor="players">Select Players</Label>
+                                  <div className="relative">
+                                      <Input
+                                          id="players"
+                                          value={searchTerm}
+                                          onChange={handleSearchChange}
+                                          placeholder="Search players"
+                                          className="w-full"
+                                      />
+                                      {searchTerm && (
+                                          <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto mt-1">
+                                              {filteredPlayers.map(player => (
+                                                  <div
+                                                      key={player._id}
+                                                      className="p-2 cursor-pointer hover:bg-gray-200"
+                                                      onClick={() => handlePlayerSelect(player)}
+                                                  >
+                                                      {player.name} - {player.position} - {player.height} cm
+                                                  </div>
+                                              ))}
+                                          </div>
+                                      )}
+                                  </div>
+                              </div>
+                          </div>
+
+                          <div className="mb-4">
+                              {selectedPlayers.map(player => (
+                                  <div key={player._id} className="flex items-center justify-between p-2 border border-gray-300 rounded-md mb-2">
+                                      <span>{player.name} - {player.position} - {player.height} cm</span>
+                                      <Button variant="ghost" size="sm" onClick={() => handlePlayerRemove(player)}>Remove</Button>
+                                  </div>
+                              ))}
+                          </div>
+
+                          <Button className="w-full" type='submit'>Create Team</Button>
+                      </form>
+                  </CardContent>
+              </Card>
           </div>
-        </form>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="rounded-full" size="icon" variant="secondary">
-              <UserCircleIcon className="h-5 w-5" />
-              <span className="sr-only">Toggle user menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Support</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Logout</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
-    </header>
-
-    <div className="flex-1 p-4 md:p-6 lg:p-8 flex">
-  <Card className="w-[600px] h-[450px]">
-    <CardHeader>
-      <CardTitle>Make Your Team!</CardTitle>
-      <CardDescription>Customize your dream team</CardDescription>
-    </CardHeader>
-    <CardContent>
-      <form className="flex justify-between flex-col gap-8" >
-        <div className="grid w-full items-center gap-4">
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="name">Team NAME</Label>
-            <Input id="name" placeholder="Team Name" />
-          </div>
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="position">Your wanted position</Label>
-            <Select >
-              <SelectTrigger id="position">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                <SelectItem value="PG">PG-Point Guard</SelectItem>
-                <SelectItem value="SG">SG-Shooting Guard</SelectItem>
-                <SelectItem value="SF">SF-Small Forward</SelectItem>
-                <SelectItem value="PF">PF-Power Forward</SelectItem>
-                <SelectItem value="C">C-Center</SelectItem>
-              </SelectContent>
-            </Select>
-
-          </div>
-        </div>
-        
-        <Button className=" w-1/4 "type='submit' >GO!</Button>
-    
-      </form>
-    </CardContent>
-    
-  </Card>
-  </div>
-
-
-    </div>
-  )
+  );
 }
 
-export default Teams
+export default Teams;
+
+
 
 
 
