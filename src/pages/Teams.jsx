@@ -12,13 +12,14 @@ import { useNavigate } from 'react-router-dom'
 import { set } from 'mongoose'
 import { useEffect } from 'react'
 
-
 const Teams = () => {
   const [teamName, setTeamName] = useState('');
   const [selectedPlayers, setSelectedPlayers] = useState([]);
   const [players, setPlayers] = useState([]);
   const [filteredPlayers, setFilteredPlayers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,6 +33,7 @@ const Teams = () => {
 
   const handleSearchChange = (e) => {
       setSearchTerm(e.target.value);
+      setDropdownVisible(true);
       if (e.target.value === '') {
           setFilteredPlayers(players);
       } else {
@@ -43,26 +45,49 @@ const Teams = () => {
   };
 
   const handlePlayerSelect = (player) => {
+      if (selectedPlayers.length >= 3) {
+          setError('A team must have exactly 3 players.');
+          return;
+      }
+      setError('');
       if (!selectedPlayers.some(p => p._id === player._id)) {
           setSelectedPlayers(prev => [...prev, player]);
       }
       setSearchTerm('');
+      setDropdownVisible(false);
       setFilteredPlayers(players);
   };
 
   const handlePlayerRemove = (player) => {
       setSelectedPlayers(prev => prev.filter(p => p._id !== player._id));
+      setError('');
+  };
+
+  const handleBlur = () => {
+      setTimeout(() => setDropdownVisible(false), 100); // Delay to allow click event to register
+  };
+
+  const handleFocus = () => {
+      setDropdownVisible(true);
+      setFilteredPlayers(players);
   };
 
   const handleSubmit = (event) => {
       event.preventDefault();
+      if (selectedPlayers.length !== 3) {
+          setError('A team must have exactly 3 players.');
+          return;
+      }
       const playerIds = selectedPlayers.map(player => player._id);
       axios.post('http://localhost:3005/teams/create', { teamName, players: playerIds })
           .then(response => {
               console.log(response.data);
               navigate('/Teams');
           })
-          .catch(err => console.error(err));
+          .catch(err => {
+              console.error(err);
+              setError(err.response.data.error);
+          });
   };
 
   return (
@@ -145,10 +170,12 @@ const Teams = () => {
                                           id="players"
                                           value={searchTerm}
                                           onChange={handleSearchChange}
+                                          onFocus={handleFocus}
+                                          onBlur={handleBlur}
                                           placeholder="Search players"
                                           className="w-full"
                                       />
-                                      {searchTerm && (
+                                      {dropdownVisible && (
                                           <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto mt-1">
                                               {filteredPlayers.map(player => (
                                                   <div
@@ -174,6 +201,7 @@ const Teams = () => {
                               ))}
                           </div>
 
+                          {error && <div className="text-red-500">{error}</div>}
                           <Button className="w-full" type='submit'>Create Team</Button>
                       </form>
                   </CardContent>
@@ -184,8 +212,6 @@ const Teams = () => {
 }
 
 export default Teams;
-
-
 
 
 
