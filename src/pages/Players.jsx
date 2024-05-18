@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,12 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from ".
 const Players = () => {
   const [name, setName] = useState('');
   const [position, setPosition] = useState('');
-  const [height, setHeight] = useState(''); // Add state for height
+  const [height, setHeight] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post('http://localhost:3005/players/Players', { name, position, height }) // Include height in the request
+    axios.post('http://localhost:3005/players/Players', { name, position, height })
       .then(result => {
         console.log(result);
         navigate('/Home');
@@ -80,7 +80,7 @@ const Players = () => {
         </div>
       </header>
 
-      <div className="flex-1 p-4 md:p-6 lg:p-8 flex">
+      <div className="flex-1 p-4 md:p-6 lg:p-8 flex justify-center items-center">
         <Card className="w-[600px] h-[550px]">
           <CardHeader>
             <CardTitle>Choose your playstyle!</CardTitle>
