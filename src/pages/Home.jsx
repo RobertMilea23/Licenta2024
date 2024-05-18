@@ -1,17 +1,19 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { Button } from "@/components/ui/button"
-import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet"
-import { Input } from "@/components/ui/input"
-import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu"
-import { CardTitle, CardHeader, CardContent, Card, CardDescription } from "@/components/ui/card"
-import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@/components/ui/table"
-import { useState, useEffect } from 'react'
-import axios from 'axios'
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu";
+import { CardTitle, CardHeader, CardContent, Card, CardDescription } from "@/components/ui/card";
+import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@/components/ui/table";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
-export default function Home() {
+
+const Home = () => {
   const [totalPlayers, setTotalPlayers] = useState(0);
   const [totalTeams, setTotalTeams] = useState(0);
+  const [teams, setTeams] = useState([]);
 
   useEffect(() => {
     axios.get('http://localhost:3005/players/countPlayers')
@@ -29,13 +31,21 @@ export default function Home() {
       .catch(err => {
         console.log('Error fetching team count:', err);
       });
+
+    axios.get('http://localhost:3005/teams')
+      .then(result => {
+        setTeams(result.data);
+      })
+      .catch(err => {
+        console.log('Error fetching teams:', err);
+      });
   }, []);
 
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
         <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-          <Link className="flex items-center gap-2 text-lg font-semibold md:text-base" href="#">
+          <Link className="flex items-center gap-2 text-lg font-semibold md:text-base" to="#">
             <ShoppingBasketIcon className="h-6 w-6" />
             <span className="sr-only">Basketball Community</span>
           </Link>
@@ -64,23 +74,23 @@ export default function Home() {
           </SheetTrigger>
           <SheetContent side="left">
             <nav className="grid gap-6 text-lg font-medium">
-              <Link className="flex items-center gap-2 text-lg font-semibold" href="#">
+              <Link className="flex items-center gap-2 text-lg font-semibold" to="#">
                 <ShoppingBasketIcon className="h-6 w-6" />
                 <span className="sr-only">Basketball Community</span>
               </Link>
-              <Link className="hover:text-foreground" href="#">
+              <Link className="hover:text-foreground" to="#">
                 Dashboard
               </Link>
-              <Link className="text-muted-foreground hover:text-foreground" href="#">
+              <Link className="text-muted-foreground hover:text-foreground" to="#">
                 Games
               </Link>
-              <Link className="text-muted-foreground hover:text-foreground" href="#">
+              <Link className="text-muted-foreground hover:text-foreground" to="#">
                 Teams
               </Link>
-              <Link className="text-muted-foreground hover:text-foreground" href="#">
+              <Link className="text-muted-foreground hover:text-foreground" to="#">
                 Players
               </Link>
-              <Link className="text-muted-foreground hover:text-foreground" href="#">
+              <Link className="text-muted-foreground hover:text-foreground" to="#">
                 Stats
               </Link>
             </nav>
@@ -166,7 +176,7 @@ export default function Home() {
                 <CardDescription>Upcoming games for the next 7 days.</CardDescription>
               </div>
               <Button asChild className="ml-auto gap-1" size="sm">
-                <Link href="#">
+                <Link to="#">
                   View All
                   <ArrowUpRightIcon className="h-4 w-4" />
                 </Link>
@@ -245,94 +255,28 @@ export default function Home() {
           </Card>
           <Card x-chunk="dashboard-01-chunk-5">
             <CardHeader>
-              <CardTitle>Recent Games</CardTitle>
+              <CardTitle>Current Teams</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-8">
-              <div className="flex items-center gap-4">
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">Lakers 120 - Warriors 110</p>
-                  <p className="text-sm text-muted-foreground">2023-06-22</p>
+              {teams.map(team => (
+                <div className="flex items-center gap-4" key={team._id}>
+                  <div className="grid gap-1">
+                    <p className="text-sm font-medium leading-none">{team.name}</p>
+                    <p className="text-sm text-muted-foreground">{team.description}</p>
+                    <p className="text-sm text-muted-foreground">Players: {team.players.map(player => player.name).join(', ')}</p>
+                  </div>
                 </div>
-                <div className="ml-auto font-medium">Staples Center</div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">Celtics 105 - Knicks 95</p>
-                  <p className="text-sm text-muted-foreground">2023-06-21</p>
-                </div>
-                <div className="ml-auto font-medium">Madison Square Garden</div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">Bucks 115 - Raptors 105</p>
-                  <p className="text-sm text-muted-foreground">2023-06-20</p>
-                </div>
-                <div className="ml-auto font-medium">Fiserv Forum</div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">Mavericks 108 - Suns 103</p>
-                  <p className="text-sm text-muted-foreground">2023-06-19</p>
-                </div>
-                <div className="ml-auto font-medium">American Airlines Center</div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="grid gap-1">
-                  <p className="text-sm font-medium leading-none">Heat 102 - Nets 98</p>
-                  <p className="text-sm text-muted-foreground">2023-06-18</p>
-                </div>
-                <div className="ml-auto font-medium">FTX Arena</div>
-              </div>
+              ))}
             </CardContent>
           </Card>
-        </div>
-        <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
-          {/* <Card x-chunk="dashboard-01-chunk-6">
-            <CardHeader className="flex flex-row items-center">
-              <div className="grid gap-2">
-                <CardTitle>Create a Team</CardTitle>
-                <CardDescription>Add a new team to the community.</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <form className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="team-name">Team Name</Label>
-                  <Input id="team-name" placeholder="Enter team name" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="team-description">Team Description</Label>
-                  <Textarea id="team-description" placeholder="Enter team description" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="team-players">Players</Label>
-                  <Select id="team-players" multiple>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select players" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Available Players</SelectLabel>
-                        <SelectItem value="player1">Player 1</SelectItem>
-                        <SelectItem value="player2">Player 2</SelectItem>
-                        <SelectItem value="player3">Player 3</SelectItem>
-                        <SelectItem value="player4">Player 4</SelectItem>
-                        <SelectItem value="player5">Player 5</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button className="w-full" type="submit">
-                  Create Team
-                </Button>
-              </form>
-            </CardContent>
-          </Card> */}
         </div>
       </main>
     </div>
   )
 }
+
+export default Home
+
 
 function ArrowUpRightIcon(props) {
   return (
@@ -475,3 +419,4 @@ function UsersIcon(props) {
     </svg>
   )
 }
+
