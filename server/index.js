@@ -4,6 +4,7 @@ const cors = require("cors");
 const usersRoute = require("./routes/usersRoute.js");
 const playersRoute = require("./routes/playersRoute.js");
 const teamsRoute = require("./routes/teamsRoute.js");
+const gamesRoute = require("./routes/gamesRoute.js");
 
 const app = express();
 
@@ -22,6 +23,7 @@ mongoose.connect("mongodb+srv://milearobert21:robstud2003@licenta2024.vjkjbpf.mo
 app.use('/users', usersRoute);
 app.use('/players', playersRoute);
 app.use('/teams', teamsRoute);
+app.use('/games', gamesRoute);
 
 app.listen(3005, () => {
     console.log("Server is running");

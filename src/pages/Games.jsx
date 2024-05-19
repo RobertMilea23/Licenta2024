@@ -6,22 +6,26 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-import { useToast } from "@/components/ui/use-toast"; // Correct import for useToast
+import { Toaster } from "@/components/ui/toaster";
+import { toast } from "@/components/ui/use-toast";
+import { format } from "date-fns"
+// Remove unused imports
+
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 const Games = () => {
   const [teams, setTeams] = useState([]);
   const [homeTeam, setHomeTeam] = useState('');
   const [awayTeam, setAwayTeam] = useState('');
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(null); // Initialize as null
   const [time, setTime] = useState('');
   const [court, setCourt] = useState('');
-  const [mapVisible, setMapVisible] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast(); // Initialize the toast
 
   useEffect(() => {
     axios.get('http://localhost:3005/teams')
@@ -31,164 +35,143 @@ const Games = () => {
       .catch(err => console.error(err));
   }, []);
 
+  const handleDateChange = (selectedDate) => {
+    setDate(selectedDate);
+    console.log("Selected Date:", selectedDate);
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     if (!homeTeam || !awayTeam || !date || !time || !court) {
-      toast.error('All fields are required.');
+      toast({
+        title: "Error",
+        description: "All fields are required.",
+        variant: "destructive",
+      });
       return;
     }
     axios.post('http://localhost:3005/games/create', { homeTeam, awayTeam, date, time, court })
       .then(response => {
-        toast.success('Game created successfully.');
+        toast({
+          title: "Success",
+          description: "Game created successfully.",
+        });
         navigate('/Games');
       })
       .catch(err => {
         console.error(err);
-        toast.error('Error creating game.');
+        toast({
+          title: "Error",
+          description: "Error creating game.",
+          variant: "destructive",
+        });
       });
   };
 
-  const handleCourtSelect = (selectedCourt) => {
-    setCourt(selectedCourt);
-    setMapVisible(false);
-  };
-
-  const mapContainerStyle = {
-    width: '100%',
-    height: '400px'
-  };
-
-  const defaultCenter = {
-    lat: 44.4268, // Default center coordinates (Bucharest)
-    lng: 26.1025
-  };
-
-  const courtsData = [
-    { name: 'Court 1', position: { lat: 44.4268, lng: 26.1025 } },
-    { name: 'Court 2', position: { lat: 44.4378, lng: 26.1175 } },
-    // Add more courts as needed
-  ];
-
   return (
-        <div className="flex min-h-screen w-full flex-col">
-          <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-            <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-              <Link className="flex items-center gap-2 text-lg font-semibold md:text-base" to="#">
-                <span className="sr-only">Basketball Community</span>
-              </Link>
-              <Link className="text-foreground transition-colors hover:text-foreground" to="/Home">
-                Dashboard
-              </Link>
-              <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Games">
-                Games
-              </Link>
-              <Link className="text-muted-foreground transition-colors hover:text-foreground" to='/Teams'>
-                Teams
-              </Link>
-              <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Players">
-                Players
-              </Link>
-              <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Stats">
-                Stats
-              </Link>
-            </nav>
-          </header>
+    <div className="flex min-h-screen w-full flex-col">
+      <Toaster />
+      <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+        <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+          <Link className="flex items-center gap-2 text-lg font-semibold md:text-base" to="#">
+            <span className="sr-only">Basketball Community</span>
+          </Link>
+          <Link className="text-foreground transition-colors hover:text-foreground" to="/Home">
+            Dashboard
+          </Link>
+          <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Games">
+            Games
+          </Link>
+          <Link className="text-muted-foreground transition-colors hover:text-foreground" to='/Teams'>
+            Teams
+          </Link>
+          <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Players">
+            Players
+          </Link>
+          <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Stats">
+            Stats
+          </Link>
+        </nav>
+      </header>
 
-          <div className="flex-1 p-4 md:p-6 lg:p-8 flex justify-center items-center">
-          <Card className="w-[600px] h-auto">
-            <CardHeader>
-              <CardTitle>Create a Game</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
-                <div className="grid w-full items-center gap-4">
-                  <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="homeTeam">Home Team</Label>
-                    <Select onValueChange={setHomeTeam}>
-                      <SelectTrigger id="homeTeam">
-                        <SelectValue placeholder="Select Home Team" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {teams.map(team => (
-                          <SelectItem key={team._id} value={team._id}>{team.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="awayTeam">Away Team</Label>
-                    <Select onValueChange={setAwayTeam}>
-                      <SelectTrigger id="awayTeam">
-                        <SelectValue placeholder="Select Away Team" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {teams.map(team => (
-                          <SelectItem key={team._id} value={team._id}>{team.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="date">Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start text-left font-normal">
-                          {date ? format(date, 'PPP') : 'Pick a date'}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar selected={date} onSelect={setDate} initialFocus />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="time">Time</Label>
-                    <Select onValueChange={setTime}>
-                      <SelectTrigger id="time">
-                        <SelectValue placeholder="Select Time" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="09:00">09:00</SelectItem>
-                        <SelectItem value="12:00">12:00</SelectItem>
-                        <SelectItem value="15:00">15:00</SelectItem>
-                        <SelectItem value="18:00">18:00</SelectItem>
-                        <SelectItem value="21:00">21:00</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex flex-col space-y-1.5">
-                    <Label htmlFor="court">Court</Label>
-                    <Button onClick={() => setMapVisible(!mapVisible)}>Select Court</Button>
-                    <Input id="court" value={court} readOnly placeholder="Selected Court" />
-                    {mapVisible && (
-                      <LoadScript googleMapsApiKey="YOUR_GOOGLE_MAPS_API_KEY">
-                        <GoogleMap
-                          mapContainerStyle={mapContainerStyle}
-                          center={defaultCenter}
-                          zoom={12}
-                        >
-                          {courtsData.map((court, index) => (
-                            <Marker
-                              key={index}
-                              position={court.position}
-                              onClick={() => handleCourtSelect(court.name)}
-                            />
-                          ))}
-                        </GoogleMap>
-                      </LoadScript>
-                    )}
-                  </div>
+      <div className="flex-1 p-4 md:p-6 lg:p-8 flex justify-center items-center">
+        <Card className="w-[600px] h-auto">
+          <CardHeader>
+            <CardTitle>Create a Game</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form className="flex flex-col gap-8" onSubmit={handleSubmit}>
+              <div className="grid w-full items-center gap-4">
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="homeTeam">Home Team</Label>
+                  <Select onValueChange={setHomeTeam}>
+                    <SelectTrigger id="homeTeam">
+                      <SelectValue placeholder="Select Home Team" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {teams.map(team => (
+                        <SelectItem key={team._id} value={team._id}>{team.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Button className="w-full" type='submit'>Create Game</Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="awayTeam">Away Team</Label>
+                  <Select onValueChange={setAwayTeam}>
+                    <SelectTrigger id="awayTeam">
+                      <SelectValue placeholder="Select Away Team" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {teams.map(team => (
+                        <SelectItem key={team._id} value={team._id}>{team.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="date">Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button id="date" variant="outline" className="w-full justify-start text-left font-normal">
+                        {date ? format(date, 'PPP') : 'Pick a date'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar selected={date} onSelect={handleDateChange} initialFocus />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="time">Time</Label>
+                  <Select onValueChange={setTime}>
+                    <SelectTrigger id="time">
+                      <SelectValue placeholder="Select Time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="09:00">09:00</SelectItem>
+                      <SelectItem value="12:00">12:00</SelectItem>
+                      <SelectItem value="15:00">15:00</SelectItem>
+                      <SelectItem value="18:00">18:00</SelectItem>
+                      <SelectItem value="21:00">21:00</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="court">Court</Label>
+                  <Input id="court" value={court} onChange={(e) => setCourt(e.target.value)} placeholder="Enter Court Name" />
+                </div>
+              </div>
+              <Button className="w-full" type='submit'>Create Game</Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
-    );
-    }
+    </div>
+  );
+}
 
 export default Games;
+
 
 function ArrowUpRightIcon(props) {
   return (
