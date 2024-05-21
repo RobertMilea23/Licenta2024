@@ -11,7 +11,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect("mongodb+srv://milearobert21:robstud2003@licenta2024.vjkjbpf.mongodb.net/managingBasketballApp")
+mongoose.connect("mongodb+srv://milearobert21:Floare2003@licenta2024.vjkjbpf.mongodb.net/managingBasketballApp")
     .then(() => {
         console.log("Connected to the database");
     })
@@ -26,5 +26,5 @@ app.use('/teams', teamsRoute);
 app.use('/games', gamesRoute);
 
 app.listen(3005, () => {
-    console.log("Server is running");
+    console.log("Server is running on port 3005");
 });

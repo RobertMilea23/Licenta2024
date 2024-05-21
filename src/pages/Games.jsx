@@ -137,7 +137,7 @@ const Games = () => {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar selected={date} onSelect={handleDateChange} initialFocus />
+                      <Calendar mode="single" selected={date} onSelect={handleDateChange} initialFocus />
                     </PopoverContent>
                   </Popover>
                 </div>
@@ -171,7 +171,6 @@ const Games = () => {
 }
 
 export default Games;
-
 
 function ArrowUpRightIcon(props) {
   return (
