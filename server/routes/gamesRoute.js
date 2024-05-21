@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Game = require('../models/Game');
-const Team = require('../models/Team');
+const Team = require('../models/Team');  // Correctly import the Team model
 
 // Route to create a new game
 router.post('/create', async (req, res) => {
@@ -32,5 +32,15 @@ router.post('/create', async (req, res) => {
   }
 });
 
-// Export the router
+// Route to get all games
+router.get('/all', async (req, res) => {
+  try {
+    const games = await Game.find().populate('homeTeam awayTeam');
+    res.status(200).json(games);
+  } catch (error) {
+    console.error('Error fetching games:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 module.exports = router;

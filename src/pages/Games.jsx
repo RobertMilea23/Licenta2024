@@ -25,12 +25,21 @@ const Games = () => {
   const [date, setDate] = useState(null); // Initialize as null
   const [time, setTime] = useState('');
   const [court, setCourt] = useState('');
+  const [courts, setCourts] = useState([]); // State for courts data
   const navigate = useNavigate();
 
   useEffect(() => {
     axios.get('http://localhost:3005/teams')
       .then(response => {
         setTeams(response.data);
+      })
+      .catch(err => console.error(err));
+
+    // Fetch courts data from the JSON file
+    fetch('/courts.json')
+      .then(response => response.json())
+      .then(data => {
+        setCourts(data);
       })
       .catch(err => console.error(err));
   }, []);
@@ -158,7 +167,16 @@ const Games = () => {
                 </div>
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="court">Court</Label>
-                  <Input id="court" value={court} onChange={(e) => setCourt(e.target.value)} placeholder="Enter Court Name" />
+                  <Select onValueChange={setCourt}>
+                    <SelectTrigger id="court">
+                      <SelectValue placeholder="Select Court" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {courts.map((court, index) => (
+                        <SelectItem key={index} value={court.name}>{court.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <Button className="w-full" type='submit'>Create Game</Button>

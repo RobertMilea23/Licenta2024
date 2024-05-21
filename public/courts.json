@@ -1,0 +1,31 @@
+[
+    {
+      "name": "Parcul Ion Voicu",
+      "location": "Bucuresti, Sectorul 2, Bulevardul Dacia"
+    },
+    {
+      "name": "Parcul Izvor",
+      "location": "Bucuresti, Splaiul Independentei"
+    },
+    {
+      "name": "Parcul Lacul Tei",
+      "location": "Bucuresti, Sectorul 2, Bulevardul Lacul Tei"
+    },
+    {
+      "name": "Parcul National (23 August)",
+      "location": "Bucuresti, Sectorul 3, Bulevardul Basarabia"
+    },
+    {
+      "name": "Parcul Regina Maria",
+      "location": "Bucuresti, Strada Turda"
+    },
+    {
+      "name": "Parcul Tineretului",
+      "location": "Bucuresti, Bulevardul Dimitrie Cantemir, Calea Serban Voda, Bulevardul Tineretului"
+    },
+    {
+      "name": "Parcul Titan (Balta Alba)",
+      "location": "Bucuresti"
+    }
+  ]
+  

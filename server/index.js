@@ -1,30 +1,32 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const usersRoute = require("./routes/usersRoute.js");
-const playersRoute = require("./routes/playersRoute.js");
-const teamsRoute = require("./routes/teamsRoute.js");
-const gamesRoute = require("./routes/gamesRoute.js");
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const usersRoute = require('./routes/usersRoute');
+const playersRoute = require('./routes/playersRoute');
+const teamsRoute = require('./routes/teamsRoute');
+const gamesRoute = require('./routes/gamesRoute');
 
 const app = express();
 
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect("mongodb+srv://milearobert21:Floare2003@licenta2024.vjkjbpf.mongodb.net/managingBasketballApp")
-    .then(() => {
-        console.log("Connected to the database");
-    })
-    .catch(() => {
-        console.log("Failed to connect to the database");
-    });
+mongoose.connect('mongodb+srv://milearobert21:Floare2003@licenta2024.vjkjbpf.mongodb.net/managingBasketballApp', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+  .then(() => {
+    console.log('Connected to the database');
+  })
+  .catch((error) => {
+    console.error('Failed to connect to the database:', error);
+  });
 
-// Use the routes
 app.use('/users', usersRoute);
 app.use('/players', playersRoute);
 app.use('/teams', teamsRoute);
 app.use('/games', gamesRoute);
 
 app.listen(3005, () => {
-    console.log("Server is running on port 3005");
+  console.log('Server is running on port 3005');
 });

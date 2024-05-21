@@ -1,4 +1,6 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet";
@@ -6,14 +8,15 @@ import { Input } from "@/components/ui/input";
 import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu";
 import { CardTitle, CardHeader, CardContent, Card, CardDescription } from "@/components/ui/card";
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@/components/ui/table";
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+
+
 
 
 const Home = () => {
   const [totalPlayers, setTotalPlayers] = useState(0);
   const [totalTeams, setTotalTeams] = useState(0);
   const [teams, setTeams] = useState([]);
+  const [games, setGames] = useState([]);  // New state for games
 
   useEffect(() => {
     axios.get('http://localhost:3005/players/countPlayers')
@@ -39,7 +42,18 @@ const Home = () => {
       .catch(err => {
         console.log('Error fetching teams:', err);
       });
+
+    // Fetch games
+    axios.get('http://localhost:3005/games/all')
+      .then(result => {
+        setGames(result.data);
+      })
+      .catch(err => {
+        console.log('Error fetching games:', err);
+      });
   }, []);
+
+  const upcomingGamesCount = games.length;
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -133,7 +147,7 @@ const Home = () => {
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12</div>
+              <div className="text-2xl font-bold">{upcomingGamesCount}</div>
               <p className="text-xs text-muted-foreground">Next 7 days</p>
             </CardContent>
           </Card>
@@ -188,67 +202,25 @@ const Home = () => {
                   <TableRow>
                     <TableHead>Home Team</TableHead>
                     <TableHead>Away Team</TableHead>
-                    <TableHead className="hidden xl:table-column">Date</TableHead>
-                    <TableHead className="hidden xl:table-column">Time</TableHead>
+                    <TableHead className="hidden xl:table-cell">Date</TableHead>
+                    <TableHead className="hidden xl:table-cell">Time</TableHead>
                     <TableHead className="text-right">Venue</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Lakers</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">Warriors</div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">2023-06-23</TableCell>
-                    <TableCell className="hidden xl:table-column">7:00 PM</TableCell>
-                    <TableCell className="text-right">Staples Center</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Celtics</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">Knicks</div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">2023-06-24</TableCell>
-                    <TableCell className="hidden xl:table-column">8:00 PM</TableCell>
-                    <TableCell className="text-right">Madison Square Garden</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Bucks</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">Raptors</div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">2023-06-25</TableCell>
-                    <TableCell className="hidden xl:table-column">6:00 PM</TableCell>
-                    <TableCell className="text-right">Fiserv Forum</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Mavericks</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">Suns</div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">2023-06-26</TableCell>
-                    <TableCell className="hidden xl:table-column">9:00 PM</TableCell>
-                    <TableCell className="text-right">American Airlines Center</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>
-                      <div className="font-medium">Heat</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-medium">Rotaru</div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-column">2023-06-27</TableCell>
-                    <TableCell className="hidden xl:table-column">7:30 PM</TableCell>
-                    <TableCell className="text-right">FTX Arena</TableCell>
-                  </TableRow>
+                  {games.map(game => (
+                    <TableRow key={game._id}>
+                      <TableCell>
+                        <div className="font-medium">{game.homeTeam.name}</div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{game.awayTeam.name}</div>
+                      </TableCell>
+                      <TableCell className="hidden xl:table-cell">{new Date(game.date).toLocaleDateString()}</TableCell>
+                      <TableCell className="hidden xl:table-cell">{game.time}</TableCell>
+                      <TableCell className="text-right">{game.court}</TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>
@@ -275,7 +247,7 @@ const Home = () => {
   )
 }
 
-export default Home
+export default Home;
 
 
 function ArrowUpRightIcon(props) {
