@@ -9,12 +9,12 @@ router.post('/Login', (req, res) => {
         .then(user => {
             if (user) {
                 if (user.password === password) {
-                    res.json('Login successful');
+                    res.json({ message: 'Login successful', role: user.role });
                 } else {
-                    res.json('Incorrect password');
+                    res.json({ message: 'Incorrect password' });
                 }
             } else {
-                res.json('User not found');
+                res.json({ message: 'User not found' });
             }
         });
 });
@@ -25,7 +25,5 @@ router.post('/Register', (req, res) => {
         .then(users => res.json(users))
         .catch(err => res.json(err));
 });
-
-
 
 module.exports = router;
