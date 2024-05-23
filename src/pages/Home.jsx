@@ -148,7 +148,7 @@ const Home = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{upcomingGamesCount}</div>
-              <p className="text-xs text-muted-foreground">Next 7 days</p>
+              
             </CardContent>
           </Card>
           <Card x-chunk="dashboard-01-chunk-1">
@@ -187,7 +187,6 @@ const Home = () => {
             <CardHeader className="flex flex-row items-center">
               <div className="grid gap-2">
                 <CardTitle>Upcoming Games</CardTitle>
-                <CardDescription>Upcoming games for the next 7 days.</CardDescription>
               </div>
               <Button asChild className="ml-auto gap-1" size="sm">
                 <Link to="#">

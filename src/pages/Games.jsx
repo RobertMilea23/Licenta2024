@@ -8,15 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
-import { format } from "date-fns"
-// Remove unused imports
+import { format } from "date-fns";
 
-import { Calendar } from "@/components/ui/calendar"
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+
 
 const Games = () => {
   const [teams, setTeams] = useState([]);
@@ -26,6 +26,7 @@ const Games = () => {
   const [time, setTime] = useState('');
   const [court, setCourt] = useState('');
   const [courts, setCourts] = useState([]); // State for courts data
+  const [availableTimes, setAvailableTimes] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,9 +45,29 @@ const Games = () => {
       .catch(err => console.error(err));
   }, []);
 
+  const fetchUnavailableTimes = (selectedDate, selectedCourt) => {
+    const formattedDate = format(selectedDate, 'yyyy-MM-dd'); // Format date for the backend
+    axios.get(`http://localhost:3005/games/date/${formattedDate}`)
+      .then(response => {
+        const games = response.data.filter(game => game.court === selectedCourt);
+        const times = games.map(game => game.time);
+        setAvailableTimes(times);
+      })
+      .catch(err => console.error('Error fetching games:', err));
+  };
+
   const handleDateChange = (selectedDate) => {
     setDate(selectedDate);
-    console.log("Selected Date:", selectedDate);
+    if (selectedDate && court) {
+      fetchUnavailableTimes(selectedDate, court);
+    }
+  };
+
+  const handleCourtChange = (selectedCourt) => {
+    setCourt(selectedCourt);
+    if (date && selectedCourt) {
+      fetchUnavailableTimes(date, selectedCourt);
+    }
   };
 
   const handleSubmit = (event) => {
@@ -75,6 +96,25 @@ const Games = () => {
           variant: "destructive",
         });
       });
+  };
+
+  const generateTimeSlots = () => {
+    const times = [];
+    for (let hour = 0; hour < 24; hour++) {
+      times.push(`${hour.toString().padStart(2, '0')}:00`);
+      times.push(`${hour.toString().padStart(2, '0')}:30`);
+    }
+    return times;
+  };
+
+  const isTimeUnavailable = (time) => {
+    const [hour, minute] = time.split(':').map(Number);
+    const timesToCheck = [
+      `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+      `${hour.toString().padStart(2, '0')}:${(minute + 30) % 60 === 0 ? '00' : (minute + 30).toString().padStart(2, '0')}`,
+      `${(hour + 1).toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`,
+    ];
+    return availableTimes.some(unavailableTime => timesToCheck.includes(unavailableTime));
   };
 
   return (
@@ -157,17 +197,17 @@ const Games = () => {
                       <SelectValue placeholder="Select Time" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="09:00">09:00</SelectItem>
-                      <SelectItem value="12:00">12:00</SelectItem>
-                      <SelectItem value="15:00">15:00</SelectItem>
-                      <SelectItem value="18:00">18:00</SelectItem>
-                      <SelectItem value="21:00">21:00</SelectItem>
+                      {generateTimeSlots().map(time => (
+                        <SelectItem key={time} value={time} disabled={isTimeUnavailable(time)}>
+                          {time}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="court">Court</Label>
-                  <Select onValueChange={setCourt}>
+                  <Select onValueChange={handleCourtChange}>
                     <SelectTrigger id="court">
                       <SelectValue placeholder="Select Court" />
                     </SelectTrigger>
