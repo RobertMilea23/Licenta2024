@@ -8,8 +8,8 @@ import Teams from './pages/Teams';
 import Players from './pages/Players';
 import Stats from './pages/Stats';
 import EditPlayer from './pages/EditPlayer';
-import ProtectedRoute from './components/ui/ProtectedRoute'; // Correct path to the component
-import UserDashboard from './pages/UserDashboard'; // Create a UserDashboard component
+import ProtectedRoute from './components/ui/ProtectedRoute';
+import UserDashboard from './pages/UserDashboard';
 
 const App = () => {
   return (
@@ -27,7 +27,7 @@ const App = () => {
           <Route path='/EditPlayer' element={<EditPlayer />} />
         </Route>
         <Route element={<ProtectedRoute role="user" />}>
-          <Route path='/UserDashboard' element={<UserDashboard />} />
+          <Route path='/UserDashboard/:userId' element={<UserDashboard />} />
         </Route>
       </Routes>
     </>

@@ -1,11 +1,13 @@
+// src/pages/Login.jsx
+
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Checkbox } from '../components/ui/checkbox';
-import { Button } from '../components/ui/button';
-import backgroundImage from '../assets/COVER_IMAGE.jfif';
 import { BiUser } from "react-icons/bi";
 import { AiOutlineUnlock } from "react-icons/ai";
+import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import backgroundImage from '../assets/COVER_IMAGE.jfif';
 import { Link } from 'react-router-dom';
 
 const Login = () => {
@@ -19,25 +21,24 @@ const Login = () => {
     axios.post('http://localhost:3005/users/Login', { email, password })
       .then(result => {
         if (result.data.message === 'Login successful') {
-          const { role } = result.data;
-          localStorage.setItem('role', role);
-          if (role === 'admin') {
-            navigate('/Home');
-          } else {
-            navigate('/UserDashboard');
-          }
+          const userId = result.data.user._id;
+          localStorage.setItem('userId', userId);
+          navigate(`/UserDashboard/${userId}`);
         } else {
           setError(result.data.message);
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        setError('An error occurred. Please try again.');
+      });
   };
 
   return (
     <div className='text-white h-[100vh] flex justify-center items-center bg-cover' style={{ backgroundImage: `url(${backgroundImage})` }}>
       <div className='bg-slate-800 border border-slate-400 rounded-md p-8 shadow-lg backdrop-filter backdrop-blur-sm bg-opacity-30 relative'>
         <div className='text-orange-700'>{error}</div>
-        <h1 className='text-4xl text-whitefont-bold text-center mb-6'>Login</h1>
+        <h1 className='text-4xl text-white font-bold text-center mb-6'>Login</h1>
         <form onSubmit={handleSubmit}>
           <div className='relative my-4'>
             <input type='email' id='email' className='block w-72 py-2.3 px-0 text-sm text-white bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:text-white focus:border-blue-600 peer' placeholder='' onChange={(e) => setEmail(e.target.value)} />
