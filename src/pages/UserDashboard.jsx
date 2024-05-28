@@ -38,7 +38,7 @@ const UserDashboard = () => {
             Teams
           </Link>
           <Link className="text-muted-foreground transition-colors hover:text-foreground" to={`/UserDashboard/${userId}/EditPlayer`}>
-            Edit Player
+            Player
           </Link>
           <Link className="text-muted-foreground transition-colors hover:text-foreground" to={`/UserDashboard/${userId}/Stats`}>
             Stats

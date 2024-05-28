@@ -2,34 +2,46 @@ const express = require('express');
 const router = express.Router();
 const playerModel = require('../models/Player.js');
 
-// Create player route
-router.post('/Players', (req, res) => {
-    const { name, position, height } = req.body; // Include height in the destructuring
-    playerModel.create({ name, position, height }) // Pass height to create method
-        .then(players => res.json(players))
-        .catch(err => res.json(err));
+// Create or update player for a user
+router.put('/createOrUpdate', async (req, res) => {
+  const { userId, name, position, height } = req.body;
+
+  try {
+    let player = await playerModel.findOne({ userId });
+    if (player) {
+      // Update existing player
+      player.name = name;
+      player.position = position;
+      player.height = height;
+      await player.save();
+      res.json(player);
+    } else {
+      // Create new player
+      player = new playerModel({ userId, name, position, height });
+      await player.save();
+      res.json(player);
+    }
+  } catch (err) {
+    console.error("Error creating/updating player:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
-// Count players route
-router.get('/countPlayers', (req, res) => {
-    playerModel.countDocuments({})
-        .then(count => {
-            res.json({ count });
-        })
-        .catch(err => {
-            console.error("Error fetching player count:", err);
-            res.status(500).json({ error: 'Internal Server Error' });
-        });
+// Get player by userId
+router.get('/user/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const player = await playerModel.findOne({ userId });
+    if (player) {
+      res.json(player);
+    } else {
+      res.status(404).json({ error: 'Player not found' });
+    }
+  } catch (err) {
+    console.error("Error fetching player:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
-
-
-// Fetch all players route (nou)
-router.get('/allPlayers', (req, res) => {
-    playerModel.find({})
-        .then(players => res.json(players))
-        .catch(err => res.status(500).json(err));
-});
-
-
 
 module.exports = router;
