@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams, Link, Outlet } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Link } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast';
 
 const UserDashboard = () => {
   const { userId } = useParams();
   const [user, setUser] = useState(null);
-  const [error, setError] = useState(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     axios.get(`http://localhost:3005/users/${userId}`)
@@ -17,17 +17,9 @@ const UserDashboard = () => {
         setUser(response.data);
       })
       .catch(err => {
-        setError(err);
+        console.error('Error fetching user:', err);
       });
   }, [userId]);
-
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
-
-  if (!user) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -45,8 +37,8 @@ const UserDashboard = () => {
           <Link className="text-muted-foreground transition-colors hover:text-foreground" to={`/UserDashboard/${userId}/Teams`}>
             Teams
           </Link>
-          <Link className="text-muted-foreground transition-colors hover:text-foreground" to={`/UserDashboard/${userId}/Players`}>
-            Players
+          <Link className="text-muted-foreground transition-colors hover:text-foreground" to={`/UserDashboard/${userId}/EditPlayer`}>
+            Edit Player
           </Link>
           <Link className="text-muted-foreground transition-colors hover:text-foreground" to={`/UserDashboard/${userId}/Stats`}>
             Stats
@@ -75,11 +67,12 @@ const UserDashboard = () => {
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <Card>
           <CardHeader>
-            <CardTitle>Welcome, {user.email}</CardTitle>
+            <CardTitle>Welcome, {user?.email}</CardTitle>
             <CardDescription>Your personalized dashboard</CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Add user-specific content here */}
+            {/* The Outlet renders the matched child route */}
+            <Outlet />
           </CardContent>
         </Card>
       </main>
