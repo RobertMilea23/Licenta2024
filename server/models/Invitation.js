@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
 
 const invitationSchema = new mongoose.Schema({
-  teamName: { type: String, required: true },
-  invitedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
-  playerId: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
-  createdAt: { type: Date, default: Date.now },
+  sender: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
+  recipient: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
+  team: { type: mongoose.Schema.Types.ObjectId, ref: 'teams', required: true },
+  status: { type: String, enum: ['pending', 'accepted', 'denied'], default: 'pending' }
+}, {
+  timestamps: true
 });
 
 const invitationModel = mongoose.model('invitations', invitationSchema);

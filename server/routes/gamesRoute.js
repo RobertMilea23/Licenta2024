@@ -15,7 +15,7 @@ const isTimeConflict = (existingTime, newTime) => {
   newDate.setHours(newHour, newMinute, 0, 0);
   
   const diff = Math.abs(newDate - existingDate);
-  return diff < 60 * 60 * 1000; // Check if the difference is less than an hour
+  return diff < 60 * 60 * 1000; 
 };
 
 // Route to create a new game

@@ -27,6 +27,16 @@ router.put('/createOrUpdate', async (req, res) => {
   }
 });
 
+router.get('/user-players', async (req, res) => {
+    try {
+      const players = await playerModel.find({ userId: { $ne: null } }); // Assuming user-created players have userId
+      res.json(players);
+    } catch (err) {
+      console.error("Error fetching user players:", err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
 // Get player by userId
 router.get('/user/:userId', async (req, res) => {
   const { userId } = req.params;
