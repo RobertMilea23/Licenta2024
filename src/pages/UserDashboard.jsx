@@ -18,8 +18,13 @@ const UserDashboard = () => {
       })
       .catch(err => {
         console.error('Error fetching user:', err);
+        toast({
+          title: 'Error fetching user',
+          description: 'There was an error fetching the user data. Please try again later.',
+          variant: 'destructive',
+        });
       });
-  }, [userId]);
+  }, [userId, toast]);
 
   return (
     <div className="flex min-h-screen w-full flex-col">
