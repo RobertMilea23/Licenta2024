@@ -1,7 +1,33 @@
+// routes/invitationsRoute.js
 const express = require('express');
 const router = express.Router();
 const invitationModel = require('../models/Invitation');
 const teamModel = require('../models/Team');
+
+// Send invitations to create a team
+router.post('/send-invitations', async (req, res) => {
+  const { teamName, ownerId, playerIds } = req.body;
+
+  try {
+    // Create a new team with only the owner as the member initially
+    const newTeam = new teamModel({ name: teamName, owner: ownerId, players: [ownerId] });
+    await newTeam.save();
+
+    // Send invitations to other players
+    const invitations = playerIds.map(playerId => ({
+      sender: ownerId,
+      recipient: playerId,
+      team: newTeam._id
+    }));
+
+    await invitationModel.insertMany(invitations);
+
+    res.status(201).json({ team: newTeam, message: 'Invitations sent.' });
+  } catch (err) {
+    console.error("Error sending invitations:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 // Handle invitation response
 router.post('/respond', async (req, res) => {

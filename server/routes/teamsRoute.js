@@ -1,50 +1,68 @@
+// routes/teamsRoute.js
 const express = require('express');
 const router = express.Router();
-const teamModel = require('../models/Team.js');
+const teamModel = require('../models/Team');
+const invitationModel = require('../models/Invitation');
 
-// Count teams route
-router.get('/countTeams', (req, res) => {
-  teamModel.countDocuments({})
-    .then(count => {
-      res.json({ count });
-    })
-    .catch(err => {
-      console.error("Error fetching team count:", err);
-      res.status(500).json({ error: 'Internal Server Error' });
-    });
-});
-
-// Fetch all teams route
-router.get('/', (req, res) => {
-  teamModel.find({})
-    .populate('players')
-    .then(teams => {
-      res.json(teams);
-    })
-    .catch(err => {
-      console.error("Error fetching teams:", err);
-      res.status(500).json({ error: 'Internal Server Error' });
-    });
-});
-
-// Create team route
-router.post('/create', async (req, res) => {
-  const { teamName, players } = req.body;
+// Send invitations to create a team
+router.post('/send-invitations', async (req, res) => {
+  const { teamName, ownerId, playerIds } = req.body;
 
   try {
-    // Check if any player is already part of another team
-    const existingTeams = await teamModel.find({ players: { $in: players } });
-    if (existingTeams.length > 0) {
-      return res.status(400).json({ error: 'One or more players are already assigned to another team.' });
-    }
-
-    const newTeam = new teamModel({ name: teamName, players });
+    // Create a new team with only the owner as the member initially
+    const newTeam = new teamModel({ name: teamName, owner: ownerId, players: [ownerId] });
     await newTeam.save();
-    res.status(201).json(newTeam);
+
+    // Send invitations to other players
+    const invitations = playerIds.map(playerId => ({
+      sender: ownerId,
+      recipient: playerId,
+      team: newTeam._id
+    }));
+
+    await invitationModel.insertMany(invitations);
+
+    res.status(201).json({ team: newTeam, message: 'Invitations sent.' });
   } catch (err) {
-    console.error("Error creating team:", err);
+    console.error("Error sending invitations:", err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
+});
+
+// Handle invitation response
+router.post('/invitations/respond', async (req, res) => {
+  const { invitationId, response } = req.body;
+
+  try {
+    const invitation = await invitationModel.findById(invitationId);
+
+    if (!invitation) {
+      return res.status(404).json({ error: 'Invitation not found' });
+    }
+
+    invitation.status = response;
+    await invitation.save();
+
+    if (response === 'accepted') {
+      const team = await teamModel.findById(invitation.team);
+      team.players.push(invitation.recipient);
+      await team.save();
+    }
+
+    res.status(200).json({ message: 'Response recorded', status: invitation.status });
+  } catch (err) {
+    console.error("Error responding to invitation:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Fetch invitations for a user
+router.get('/invitations/:userId', (req, res) => {
+  invitationModel.find({ recipient: req.params.userId })
+    .populate('sender', 'email')
+    .populate('team', 'name')
+    .then(invitations => res.json(invitations))
+    .catch(err => res.status(500).json(err));
 });
 
 module.exports = router;

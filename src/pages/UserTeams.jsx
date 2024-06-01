@@ -39,8 +39,8 @@ const UserTeams = () => {
     setInvitedPlayers(invitedPlayers.filter(player => player._id !== playerId));
   };
 
-  const handleSubmit = () => {
-    axios.post('http://localhost:3005/teams/create', {
+  const handleSendInvitations = () => {
+    axios.post('http://localhost:3005/teams/send-invitations', {
       teamName,
       ownerId: userId,
       playerIds: invitedPlayers.map(player => player._id)
@@ -51,7 +51,7 @@ const UserTeams = () => {
         setTeamName('');
         setInvitedPlayers([]);
       })
-      .catch(err => console.error('Error creating team:', err));
+      .catch(err => console.error('Error sending invitations:', err));
   };
 
   const handleInvitationResponse = (invitationId, response) => {
@@ -74,7 +74,7 @@ const UserTeams = () => {
     <div className="flex min-h-screen w-full flex-col items-center justify-center">
       <Card className="w-[600px]">
         <CardHeader>
-          <CardTitle>Create Team</CardTitle>
+          <CardTitle>Send Team Invitations</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-4">
@@ -111,8 +111,8 @@ const UserTeams = () => {
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={handleSubmit} disabled={!teamName || invitedPlayers.length === 0}>
-            Create Team
+          <Button onClick={handleSendInvitations} disabled={!teamName || invitedPlayers.length === 0}>
+            Send Invitations
           </Button>
         </CardFooter>
       </Card>
@@ -125,7 +125,7 @@ const UserTeams = () => {
               {invitation.status === 'pending' ? (
                 <div>
                   <Button onClick={() => handleInvitationResponse(invitation._id, 'accepted')}>Accept</Button>
-                  <Button variant="destructive" onClick={() => handleInvitationResponse(invitation._id, 'rejected')}>Deny</Button>
+                  <Button variant="destructive" onClick={() => handleInvitationResponse(invitation._id, 'declined')}>Decline</Button>
                 </div>
               ) : (
                 <span>{invitation.status}</span>
