@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { BiUser } from "react-icons/bi";
-import { AiOutlineUnlock } from "react-icons/ai";
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
 import backgroundImage from '../assets/COVER_IMAGE.jfif';
 import { Link } from 'react-router-dom';
 

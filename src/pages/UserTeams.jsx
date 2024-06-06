@@ -125,7 +125,7 @@ const UserTeams = () => {
               {invitation.status === 'pending' ? (
                 <div>
                   <Button onClick={() => handleInvitationResponse(invitation._id, 'accepted')}>Accept</Button>
-                  <Button variant="destructive" onClick={() => handleInvitationResponse(invitation._id, 'declined')}>Decline</Button>
+                  <Button variant="destructive" onClick={() => handleInvitationResponse(invitation._id, 'rejected')}>Deny</Button>
                 </div>
               ) : (
                 <span>{invitation.status}</span>

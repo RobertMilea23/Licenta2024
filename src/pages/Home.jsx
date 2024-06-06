@@ -16,7 +16,7 @@ const Home = () => {
   const [totalPlayers, setTotalPlayers] = useState(0);
   const [totalTeams, setTotalTeams] = useState(0);
   const [teams, setTeams] = useState([]);
-  const [games, setGames] = useState([]);  // New state for games
+  const [games, setGames] = useState([]);
 
   useEffect(() => {
     axios.get('http://localhost:3005/players/countPlayers')
@@ -43,7 +43,6 @@ const Home = () => {
         console.log('Error fetching teams:', err);
       });
 
-    // Fetch games
     axios.get('http://localhost:3005/games/all')
       .then(result => {
         setGames(result.data);
@@ -201,8 +200,6 @@ const Home = () => {
                   <TableRow>
                     <TableHead>Home Team</TableHead>
                     <TableHead>Away Team</TableHead>
-                    <TableHead className="hidden xl:table-cell">Date</TableHead>
-                    <TableHead className="hidden xl:table-cell">Time</TableHead>
                     <TableHead className="text-right">Venue</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -210,13 +207,11 @@ const Home = () => {
                   {games.map(game => (
                     <TableRow key={game._id}>
                       <TableCell>
-                        <div className="font-medium">{game.homeTeam.name}</div>
+                        <div className="font-medium">error2</div>
                       </TableCell>
                       <TableCell>
-                        <div className="font-medium">{game.awayTeam.name}</div>
+                        <div className="font-medium">error1</div>
                       </TableCell>
-                      <TableCell className="hidden xl:table-cell">{new Date(game.date).toLocaleDateString()}</TableCell>
-                      <TableCell className="hidden xl:table-cell">{game.time}</TableCell>
                       <TableCell className="text-right">{game.court}</TableCell>
                     </TableRow>
                   ))}
@@ -229,22 +224,26 @@ const Home = () => {
               <CardTitle>Current Teams</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-8">
-              {teams.map(team => (
-                <div className="flex items-center gap-4" key={team._id}>
-                  <div className="grid gap-1">
-                    <p className="text-sm font-medium leading-none">{team.name}</p>
-                    <p className="text-sm text-muted-foreground">{team.description}</p>
-                    <p className="text-sm text-muted-foreground">Players: {team.players.map(player => player.name).join(', ')}</p>
+              {teams.length > 0 ? (
+                teams.map(team => (
+                  <div className="flex items-center gap-4" key={team._id}>
+                    <div className="grid gap-1">
+                      <p className="text-sm font-medium leading-none">{team.name}</p>
+                      <p className="text-sm text-muted-foreground">{team.description}</p>
+                      <p className="text-sm text-muted-foreground">Players: {team.players.map(player => player.name).join(', ')}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p>No teams created by users.</p>
+              )}
             </CardContent>
           </Card>
         </div>
       </main>
     </div>
-  )
-}
+  );
+};
 
 export default Home;
 

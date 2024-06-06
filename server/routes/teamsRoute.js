@@ -1,3 +1,4 @@
+
 // routes/teamsRoute.js
 const express = require('express');
 const router = express.Router();
@@ -63,6 +64,19 @@ router.get('/invitations/:userId', (req, res) => {
     .populate('team', 'name')
     .then(invitations => res.json(invitations))
     .catch(err => res.status(500).json(err));
+});
+
+router.get('/', (req, res) => {
+  teamModel.find({}) // You might want to add a filter here, e.g., { createdByUser: true }
+    .populate('players')
+    .then(teams => res.json(teams))
+    .catch(err => res.status(500).json({ error: 'Internal Server Error', details: err }));
+});
+
+router.get('/countTeams', (req, res) => {
+  teamModel.countDocuments({ role: 'user' }) // Assuming user-created teams have role 'user'
+    .then(count => res.json({ count }))
+    .catch(err => res.status(500).json({ error: 'Internal Server Error' }));
 });
 
 module.exports = router;

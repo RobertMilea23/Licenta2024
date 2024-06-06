@@ -2,6 +2,13 @@ const express = require('express');
 const router = express.Router();
 const playerModel = require('../models/Player.js');
 
+router.get('/countPlayers', (req, res) => {
+  playerModel.countDocuments()
+    .then(count => res.json({ count }))
+    .catch(err => res.status(500).json({ error: 'Internal Server Error', details: err }));
+});
+
+
 // Create or update player for a user
 router.put('/createOrUpdate', async (req, res) => {
   const { userId, name, position, height } = req.body;
@@ -28,14 +35,14 @@ router.put('/createOrUpdate', async (req, res) => {
 });
 
 router.get('/user-players', async (req, res) => {
-    try {
-      const players = await playerModel.find({ userId: { $ne: null } }); // Assuming user-created players have userId
-      res.json(players);
-    } catch (err) {
-      console.error("Error fetching user players:", err);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
+  try {
+    const players = await playerModel.find({ userId: { $ne: null } });
+    res.json(players);
+  } catch (err) {
+    console.error("Error fetching user players:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 // Get player by userId
 router.get('/user/:userId', async (req, res) => {
