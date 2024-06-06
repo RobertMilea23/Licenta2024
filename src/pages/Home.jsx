@@ -1,7 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Button } from "@/components/ui/button";
 import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
@@ -9,14 +10,15 @@ import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, Dropdown
 import { CardTitle, CardHeader, CardContent, Card, CardDescription } from "@/components/ui/card";
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@/components/ui/table";
 
-
-
+// Register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const Home = () => {
   const [totalPlayers, setTotalPlayers] = useState(0);
   const [totalTeams, setTotalTeams] = useState(0);
   const [teams, setTeams] = useState([]);
   const [games, setGames] = useState([]);
+  const [playerPositions, setPlayerPositions] = useState({});
 
   useEffect(() => {
     axios.get('http://localhost:3005/players/countPlayers')
@@ -50,9 +52,32 @@ const Home = () => {
       .catch(err => {
         console.log('Error fetching games:', err);
       });
+
+    axios.get('http://localhost:3005/players/all')
+      .then(result => {
+        const positions = result.data.reduce((acc, player) => {
+          acc[player.position] = (acc[player.position] || 0) + 1;
+          return acc;
+        }, {});
+        setPlayerPositions(positions);
+      })
+      .catch(err => {
+        console.log('Error fetching player positions:', err);
+      });
   }, []);
 
   const upcomingGamesCount = games.length;
+
+  const data = {
+    labels: Object.keys(playerPositions),
+    datasets: [
+      {
+        label: 'Number of Players',
+        data: Object.values(playerPositions),
+        backgroundColor: '#FF8200', // Set the color to orange with some transparency
+      },
+    ],
+  };
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -147,7 +172,6 @@ const Home = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{upcomingGamesCount}</div>
-              
             </CardContent>
           </Card>
           <Card x-chunk="dashboard-01-chunk-1">
@@ -237,6 +261,14 @@ const Home = () => {
               ) : (
                 <p>No teams created by users.</p>
               )}
+            </CardContent>
+          </Card>
+          <Card x-chunk="dashboard-01-chunk-6">
+            <CardHeader>
+              <CardTitle>Player Positions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Bar data={data} />
             </CardContent>
           </Card>
         </div>

@@ -62,7 +62,7 @@ router.get('/:userId', (req, res) => {
     .populate('sender', 'email')
     .populate('team', 'name')
     .then(invitations => res.json(invitations))
-    .catch(err => res.status(500).json(err));
+    .catch(err => res.status(500).json({ error: 'Internal Server Error', details: err }));
 });
 
 module.exports = router;

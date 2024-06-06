@@ -43,7 +43,7 @@ const UserTeams = () => {
     axios.post('http://localhost:3005/teams/send-invitations', {
       teamName,
       ownerId: userId,
-      playerIds: invitedPlayers.map(player => player._id)
+      playerIds: invitedPlayers.map(player => player.userId) // Ensure correct userId is sent
     })
       .then(response => {
         console.log(response.data.message);
@@ -139,3 +139,4 @@ const UserTeams = () => {
 };
 
 export default UserTeams;
+

@@ -8,6 +8,15 @@ router.get('/countPlayers', (req, res) => {
     .catch(err => res.status(500).json({ error: 'Internal Server Error', details: err }));
 });
 
+router.get('/all', async (req, res) => {
+  try {
+    const players = await playerModel.find();
+    res.json(players);
+  } catch (err) {
+    console.error("Error fetching players:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 // Create or update player for a user
 router.put('/createOrUpdate', async (req, res) => {
