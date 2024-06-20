@@ -29,7 +29,6 @@ router.post('/send-invitations', async (req, res) => {
   }
 });
 
-// Handle invitation response
 router.post('/respond', async (req, res) => {
   const { invitationId, response } = req.body;
 
@@ -45,16 +44,26 @@ router.post('/respond', async (req, res) => {
 
     if (response === 'accepted') {
       const team = await teamModel.findById(invitation.team);
-      team.players.push(invitation.recipient);
-      await team.save();
+      if (!team) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+      // Add the recipient to the team only if not already a member
+      if (!team.players.includes(invitation.recipient)) {
+        team.players.push(invitation.recipient);
+        await team.save();
+      }
+    } else if (response === 'rejected') {
+      // No modifications to the team are needed when the invitation is rejected
+      console.log(`Invitation ${invitationId} was rejected by ${invitation.recipient}`);
     }
 
     res.status(200).json({ message: 'Response recorded', status: invitation.status });
   } catch (err) {
     console.error("Error responding to invitation:", err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Internal Server Error', details: err.message });
   }
 });
+
 
 // Fetch invitations for a user
 router.get('/:userId', (req, res) => {

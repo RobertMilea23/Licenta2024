@@ -1,25 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useParams } from 'react-router-dom';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../components/ui/card';
 import { Label } from '../components/ui/label';
 
 const UserTeams = () => {
+  const { userId } = useParams();
   const [teamName, setTeamName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [players, setPlayers] = useState([]);
   const [invitedPlayers, setInvitedPlayers] = useState([]);
   const [invitations, setInvitations] = useState([]);
-  const userId = localStorage.getItem('userId');
 
   useEffect(() => {
-    // Fetch user-created players
     axios.get('http://localhost:3005/players/user-players')
       .then(response => setPlayers(response.data))
       .catch(err => console.error('Error fetching players:', err));
 
-    // Fetch invitations for the user
     axios.get(`http://localhost:3005/invitations/${userId}`)
       .then(response => setInvitations(response.data))
       .catch(err => console.error('Error fetching invitations:', err));
@@ -63,7 +62,10 @@ const UserTeams = () => {
           )
         );
       })
-      .catch(err => console.error('Error responding to invitation:', err));
+      .catch(err => {
+        console.error('Error responding to invitation:', err);
+        alert(`Error responding to invitation: ${err.response?.data?.error || err.message}`);
+      });
   };
 
   const filteredPlayers = players.filter(player =>
@@ -75,6 +77,7 @@ const UserTeams = () => {
       <Card className="w-[600px]">
         <CardHeader>
           <CardTitle>Send Team Invitations</CardTitle>
+
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-4">
@@ -128,7 +131,7 @@ const UserTeams = () => {
                   <Button variant="destructive" onClick={() => handleInvitationResponse(invitation._id, 'rejected')}>Deny</Button>
                 </div>
               ) : (
-                <span>{invitation.status}</span>
+                <span>{invitation.status.charAt(0).toUpperCase() + invitation.status.slice(1)}</span>
               )}
             </li>
           ))}
@@ -139,4 +142,3 @@ const UserTeams = () => {
 };
 
 export default UserTeams;
-
