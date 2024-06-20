@@ -4,31 +4,37 @@ const router = express.Router();
 const invitationModel = require('../models/Invitation');
 const teamModel = require('../models/Team');
 
-// Send invitations to create a team
+// Send invitations to create or add to a team
 router.post('/send-invitations', async (req, res) => {
   const { teamName, ownerId, playerIds } = req.body;
 
   try {
-    // Create a new team with only the owner as the member initially
-    const newTeam = new teamModel({ name: teamName, owner: ownerId, players: [ownerId] });
-    await newTeam.save();
+    // Find an existing team with the owner and the provided team name in pending state
+    let team = await teamModel.findOne({ owner: ownerId, status: 'pending' });
+
+    // If no such team exists, create a new one
+    if (!team) {
+      team = new teamModel({ name: teamName, owner: ownerId, players: [ownerId], status: 'pending' });
+      await team.save();
+    }
 
     // Send invitations to other players
     const invitations = playerIds.map(playerId => ({
       sender: ownerId,
       recipient: playerId,
-      team: newTeam._id
+      team: team._id
     }));
 
     await invitationModel.insertMany(invitations);
 
-    res.status(201).json({ team: newTeam, message: 'Invitations sent.' });
+    res.status(201).json({ team, message: 'Invitations sent.' });
   } catch (err) {
     console.error("Error sending invitations:", err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
+// Handle invitation response
 router.post('/respond', async (req, res) => {
   const { invitationId, response } = req.body;
 
@@ -47,9 +53,13 @@ router.post('/respond', async (req, res) => {
       if (!team) {
         return res.status(404).json({ error: 'Team not found' });
       }
-      // Add the recipient to the team only if not already a member
+
       if (!team.players.includes(invitation.recipient)) {
         team.players.push(invitation.recipient);
+
+        if (team.players.length === 3) {
+          team.status = 'formed';
+        }
         await team.save();
       }
     } else if (response === 'rejected') {
@@ -63,7 +73,6 @@ router.post('/respond', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error', details: err.message });
   }
 });
-
 
 // Fetch invitations for a user
 router.get('/:userId', (req, res) => {
