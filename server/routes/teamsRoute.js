@@ -87,17 +87,41 @@ router.get('/user/:userId', async (req, res) => {
     const team = await teamModel.findOne({ players: req.params.userId })
       .populate('owner', 'email')
       .populate('players', 'email');
-
     if (!team) {
       return res.status(404).json({ error: 'No team found for the user' });
     }
-
     res.json(team);
   } catch (err) {
-    console.error("Error fetching team:", err);
+    console.error("Error fetching user's team:", err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+// Fetch basic team information for a specific user
+router.get('/user-simple/:userId', async (req, res) => {
+  try {
+    const team = await teamModel.findOne({ players: req.params.userId });
+    if (!team) {
+      return res.status(404).json({ error: 'Team not found for this user' });
+    }
+    res.status(200).json(team);
+  } catch (err) {
+    console.error("Error fetching user's team:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.get('/', async (req, res) => {
+  try {
+    const teams = await teamModel.find({});
+    res.status(200).json(teams);
+  } catch (err) {
+    console.error("Error fetching teams:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 
 // Leave team
 router.post('/leave-team', async (req, res) => {

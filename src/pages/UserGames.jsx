@@ -4,22 +4,18 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
-import { format } from "date-fns"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const UserGames = () => {
   const { userId } = useParams();
   const [teams, setTeams] = useState([]);
   const [homeTeam, setHomeTeam] = useState('');
+  const [homeTeamName, setHomeTeamName] = useState('');
   const [awayTeam, setAwayTeam] = useState('');
   const [date, setDate] = useState(null);
   const [time, setTime] = useState('');
@@ -29,19 +25,47 @@ const UserGames = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Fetch all teams
     axios.get('http://localhost:3005/teams')
       .then(response => {
         setTeams(response.data);
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error("Error fetching teams:", err);
+        toast({
+          title: "Error",
+          description: "Could not fetch teams.",
+          variant: "destructive",
+        });
+      });
 
+    // Fetch user's team
+    axios.get(`http://localhost:3005/teams/user/${userId}`)
+      .then(response => {
+        const userTeam = response.data;
+        setHomeTeam(userTeam._id);
+        setHomeTeamName(userTeam.name);
+
+        // Filter out the user's team from the list of teams available for away team
+        setTeams(prevTeams => prevTeams.filter(team => team._id !== userTeam._id));
+      })
+      .catch(err => {
+        console.error("Error fetching user's team:", err);
+        toast({
+          title: "Error",
+          description: "Could not fetch user's team.",
+          variant: "destructive",
+        });
+      });
+
+    // Fetch courts
     fetch('/courts.json')
       .then(response => response.json())
       .then(data => {
         setCourts(data);
       })
-      .catch(err => console.error(err));
-  }, []);
+      .catch(err => console.error("Error fetching courts:", err));
+  }, [userId]);
 
   const fetchUnavailableTimes = (selectedDate) => {
     const formattedDate = selectedDate.toISOString().split('T')[0];
@@ -49,7 +73,7 @@ const UserGames = () => {
       .then(response => {
         setUnavailableTimes(response.data);
       })
-      .catch(err => console.error(err));
+      .catch(err => console.error("Error fetching unavailable times:", err));
   };
 
   const handleDateChange = (selectedDate) => {
@@ -92,7 +116,7 @@ const UserGames = () => {
         navigate(`/UserDashboard/${userId}/Games`);
       })
       .catch(err => {
-        console.error(err);
+        console.error("Error creating game:", err);
         toast({
           title: "Error",
           description: "Error creating game.",
@@ -120,16 +144,12 @@ const UserGames = () => {
               <div className="grid w-full items-center gap-4">
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="homeTeam">Home Team</Label>
-                  <Select onValueChange={setHomeTeam}>
-                    <SelectTrigger id="homeTeam">
-                      <SelectValue placeholder="Select Home Team" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {teams.map(team => (
-                        <SelectItem key={team._id} value={team._id}>{team.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <input
+                    id="homeTeam"
+                    value={homeTeamName}
+                    readOnly
+                    className="form-input"
+                  />
                 </div>
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="awayTeam">Away Team</Label>
@@ -138,9 +158,11 @@ const UserGames = () => {
                       <SelectValue placeholder="Select Away Team" />
                     </SelectTrigger>
                     <SelectContent>
-                      {teams.map(team => (
-                        <SelectItem key={team._id} value={team._id}>{team.name}</SelectItem>
-                      ))}
+                      {teams
+                        .filter(team => team._id !== homeTeam) // Exclude home team from list
+                        .map(team => (
+                          <SelectItem key={team._id} value={team._id}>{team.name}</SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
