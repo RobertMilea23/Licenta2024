@@ -9,8 +9,9 @@ import { useToast } from '@/components/ui/use-toast';
 const UserDashboard = () => {
   const { userId } = useParams();
   const [user, setUser] = useState(null);
-  const [team, setTeam] = useState(null); // Add state for user's team
-  const [invitations, setInvitations] = useState([]); // Add state for game invitations
+  const [team, setTeam] = useState(null);
+  const [confirmedGames, setConfirmedGames] = useState([]);
+  const [invitations, setInvitations] = useState([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -23,21 +24,48 @@ const UserDashboard = () => {
       })
       .then(response => {
         setTeam(response.data);
-        // Fetch game invitations for the user's team
-        return axios.get(`http://localhost:3005/games/invitations/${response.data._id}`);
-      })
-      .then(response => {
-        setInvitations(response.data);
       })
       .catch(err => {
-        console.error('Error fetching data:', err);
+        console.error('Error fetching user or team:', err);
         toast({
           title: 'Error fetching data',
-          description: 'There was an error fetching the data. Please try again later.',
+          description: 'There was an error fetching the user or team data. Please try again later.',
           variant: 'destructive',
         });
       });
   }, [userId, toast]);
+
+  useEffect(() => {
+    if (team) {
+      // Fetch confirmed games for the user's team
+      axios.get(`http://localhost:3005/games/confirmed/${team._id}`)
+        .then(response => {
+          setConfirmedGames(response.data);
+        })
+        .catch(err => {
+          console.error('Error fetching confirmed games:', err);
+          toast({
+            title: 'Error fetching confirmed games',
+            description: 'There was an error fetching confirmed games. Please try again later.',
+            variant: 'destructive',
+          });
+        });
+
+      // Fetch game invitations for the user's team
+      axios.get(`http://localhost:3005/games/invitations/${team._id}`)
+        .then(response => {
+          setInvitations(response.data);
+        })
+        .catch(err => {
+          console.error('Error fetching game invitations:', err);
+          toast({
+            title: 'Error fetching game invitations',
+            description: 'There was an error fetching game invitations. Please try again later.',
+            variant: 'destructive',
+          });
+        });
+    }
+  }, [team, toast]);
 
   const handleResponse = (gameId, response) => {
     axios.post('http://localhost:3005/games/invitations/respond', { gameId, response })
@@ -140,6 +168,26 @@ const UserDashboard = () => {
             <Outlet />
           </CardContent>
         </Card>
+
+        {/* Display confirmed games */}
+        {confirmedGames.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold">Confirmed Games</h2>
+            <div className="space-y-4">
+              {confirmedGames.map(game => (
+                <Card key={game._id} className="p-4">
+                  <CardHeader>
+                    <CardTitle>{game.homeTeam.name} vs {game.awayTeam.name}</CardTitle>
+                    <CardDescription>{new Date(game.date).toLocaleDateString()} at {game.time}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p><strong>Venue:</strong> {game.court}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
