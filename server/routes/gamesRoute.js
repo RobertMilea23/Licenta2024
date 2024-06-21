@@ -3,6 +3,49 @@ const router = express.Router();
 const Game = require('../models/Game');
 const Team = require('../models/Team');
 
+
+
+
+
+
+// Fetch game invitations for a team
+router.get('/invitations/:teamId', async (req, res) => {
+  try {
+    const games = await Game.find({ awayTeam: req.params.teamId, status: 'pending' })
+      .populate('homeTeam', 'name')
+      .populate('awayTeam', 'name');
+    res.status(200).json(games);
+  } catch (err) {
+    console.error("Error fetching game invitations:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Handle game invitation response
+router.post('/invitations/respond', async (req, res) => {
+  const { gameId, response } = req.body;
+
+  try {
+    const game = await Game.findById(gameId);
+
+    if (!game) {
+      return res.status(404).json({ error: 'Game not found' });
+    }
+
+    if (!['confirmed', 'denied'].includes(response)) {
+      return res.status(400).json({ error: 'Invalid response' });
+    }
+
+    game.status = response;
+    await game.save();
+
+    res.status(200).json({ message: 'Response recorded', status: game.status });
+  } catch (err) {
+    console.error("Error responding to game invitation:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 // Helper function to check for time conflicts
 const isTimeConflict = (existingTime, newTime) => {
   const [existingHour, existingMinute] = existingTime.split(':').map(Number);

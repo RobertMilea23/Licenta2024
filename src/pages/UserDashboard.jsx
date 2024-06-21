@@ -9,22 +9,54 @@ import { useToast } from '@/components/ui/use-toast';
 const UserDashboard = () => {
   const { userId } = useParams();
   const [user, setUser] = useState(null);
+  const [team, setTeam] = useState(null); // Add state for user's team
+  const [invitations, setInvitations] = useState([]); // Add state for game invitations
   const { toast } = useToast();
 
   useEffect(() => {
+    // Fetch user information
     axios.get(`http://localhost:3005/users/${userId}`)
       .then(response => {
         setUser(response.data);
+        // Fetch the user's team
+        return axios.get(`http://localhost:3005/teams/user/${userId}`);
+      })
+      .then(response => {
+        setTeam(response.data);
+        // Fetch game invitations for the user's team
+        return axios.get(`http://localhost:3005/games/invitations/${response.data._id}`);
+      })
+      .then(response => {
+        setInvitations(response.data);
       })
       .catch(err => {
-        console.error('Error fetching user:', err);
+        console.error('Error fetching data:', err);
         toast({
-          title: 'Error fetching user',
-          description: 'There was an error fetching the user data. Please try again later.',
+          title: 'Error fetching data',
+          description: 'There was an error fetching the data. Please try again later.',
           variant: 'destructive',
         });
       });
   }, [userId, toast]);
+
+  const handleResponse = (gameId, response) => {
+    axios.post('http://localhost:3005/games/invitations/respond', { gameId, response })
+      .then(() => {
+        setInvitations(invitations.filter(invitation => invitation._id !== gameId));
+        toast({
+          title: "Success",
+          description: `Game ${response} successfully.`,
+        });
+      })
+      .catch(err => {
+        console.error("Error responding to game invitation:", err);
+        toast({
+          title: "Error",
+          description: `Error responding to game invitation.`,
+          variant: "destructive",
+        });
+      });
+  };
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -69,6 +101,7 @@ const UserDashboard = () => {
           </DropdownMenu>
         </div>
       </header>
+
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <Card>
           <CardHeader>
@@ -76,6 +109,33 @@ const UserDashboard = () => {
             <CardDescription>Your personalized dashboard</CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Display the user's team */}
+            {team && (
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold">Your Team: {team.name}</h2>
+              </div>
+            )}
+
+            {/* Display game invitations */}
+            {invitations.length > 0 && (
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold">Game Invitations</h2>
+                {invitations.map(invitation => (
+                  <div key={invitation._id} className="flex flex-col gap-4 mb-4 border p-4 rounded">
+                    <p><strong>Home Team:</strong> {invitation.homeTeam.name}</p>
+                    <p><strong>Away Team:</strong> {invitation.awayTeam.name}</p>
+                    <p><strong>Date:</strong> {new Date(invitation.date).toLocaleDateString()}</p>
+                    <p><strong>Time:</strong> {invitation.time}</p>
+                    <p><strong>Court:</strong> {invitation.court}</p>
+                    <div className="flex gap-2">
+                      <Button onClick={() => handleResponse(invitation._id, 'confirmed')}>Confirm</Button>
+                      <Button onClick={() => handleResponse(invitation._id, 'denied')} variant="destructive">Deny</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* The Outlet renders the matched child route */}
             <Outlet />
           </CardContent>
