@@ -24,6 +24,7 @@ const UserGames = () => {
   const [courts, setCourts] = useState([]);
   const [unavailableTimes, setUnavailableTimes] = useState([]);
   const [confirmedGames, setConfirmedGames] = useState([]);
+  const [openGames, setOpenGames] = useState([]); // State for open games
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,14 +42,13 @@ const UserGames = () => {
         });
       });
 
-    // Fetch user's team
+    // Fetch user's team and their confirmed games
+    let userTeam; // Declare userTeam in the correct scope
     axios.get(`http://localhost:3005/teams/user/${userId}`)
       .then(response => {
-        const userTeam = response.data;
+        userTeam = response.data; // Assign userTeam correctly
         setHomeTeam(userTeam._id);
         setHomeTeamName(userTeam.name);
-
-        // Filter out the user's team from the list of teams available for away team
         setTeams(prevTeams => prevTeams.filter(team => team._id !== userTeam._id));
 
         // Fetch confirmed games for user's team
@@ -56,12 +56,18 @@ const UserGames = () => {
       })
       .then(response => {
         setConfirmedGames(response.data);
+
+        // Fetch open games, excluding those created by the user's team
+        return axios.get(`http://localhost:3005/games/open/${userTeam._id}`);
+      })
+      .then(response => {
+        setOpenGames(response.data);
       })
       .catch(err => {
         console.error("Error fetching data:", err);
         toast({
           title: "Error",
-          description: "Could not fetch user's team or confirmed games.",
+          description: "Could not fetch user's team, confirmed games, or open games.",
           variant: "destructive",
         });
       });
@@ -107,7 +113,7 @@ const UserGames = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!homeTeam || !awayTeam || !date || !time || !court) {
+    if (!homeTeam || !date || !time || !court) {
       toast({
         title: "Error",
         description: "All fields are required.",
@@ -128,6 +134,44 @@ const UserGames = () => {
         toast({
           title: "Error",
           description: "Error creating game.",
+          variant: "destructive",
+        });
+      });
+  };
+
+  const handleAcceptOpenGame = (gameId) => {
+    axios.post('http://localhost:3005/games/accept-open', { gameId, teamId: homeTeam })
+      .then(response => {
+        setOpenGames(openGames.filter(game => game._id !== gameId));
+        toast({
+          title: "Success",
+          description: "You have accepted the game.",
+        });
+      })
+      .catch(err => {
+        console.error("Error accepting open game:", err);
+        toast({
+          title: "Error",
+          description: "Error accepting open game.",
+          variant: "destructive",
+        });
+      });
+  };
+
+  const handleDeclineOpenGame = (gameId) => {
+    axios.post('http://localhost:3005/games/decline-open', { gameId })
+      .then(response => {
+        setOpenGames(openGames.filter(game => game._id !== gameId));
+        toast({
+          title: "Success",
+          description: "You have declined the game.",
+        });
+      })
+      .catch(err => {
+        console.error("Error declining open game:", err);
+        toast({
+          title: "Error",
+          description: "Error declining open game.",
           variant: "destructive",
         });
       });
@@ -220,7 +264,7 @@ const UserGames = () => {
         </Card>
 
         {/* Confirmed Games Section */}
-        <Card className="w-full max-w-[600px]">
+        <Card className="w-full max-w-[600px] mb-8">
           <CardHeader>
             <CardTitle>Confirmed Games</CardTitle>
           </CardHeader>
@@ -239,8 +283,8 @@ const UserGames = () => {
                 <TableBody>
                   {confirmedGames.map(game => (
                     <TableRow key={game._id}>
-                      <TableCell>{game.homeTeam.name}</TableCell>
-                      <TableCell>{game.awayTeam.name}</TableCell>
+                      <TableCell>{game.homeTeam?.name || 'N/A'}</TableCell>
+                      <TableCell>{game.awayTeam?.name || 'N/A'}</TableCell>
                       <TableCell>{format(new Date(game.date), 'PPP')}</TableCell>
                       <TableCell>{game.time}</TableCell>
                       <TableCell>{game.court}</TableCell>
@@ -250,6 +294,31 @@ const UserGames = () => {
               </Table>
             ) : (
               <p>No confirmed games.</p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Open Games Section */}
+        <Card className="w-full max-w-[600px]">
+          <CardHeader>
+            <CardTitle>Open Games</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {openGames.length > 0 ? (
+              openGames.map(game => (
+                <div key={game._id} className="flex flex-col gap-4 mb-4 border p-4 rounded">
+                  <p><strong>Home Team:</strong> {game.homeTeam?.name || 'N/A'}</p>
+                  <p><strong>Date:</strong> {new Date(game.date).toLocaleDateString()}</p>
+                  <p><strong>Time:</strong> {game.time}</p>
+                  <p><strong>Court:</strong> {game.court}</p>
+                  <div className="flex gap-2">
+                    <Button onClick={() => handleAcceptOpenGame(game._id)}>Accept</Button>
+                    <Button onClick={() => handleDeclineOpenGame(game._id)} variant="destructive">Decline</Button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p>No open games.</p>
             )}
           </CardContent>
         </Card>

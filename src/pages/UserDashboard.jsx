@@ -10,6 +10,7 @@ const UserDashboard = () => {
   const { userId } = useParams();
   const [user, setUser] = useState(null);
   const [team, setTeam] = useState(null);
+  const [gameInvitations, setGameInvitations] = useState([]); // State for game invitations
   const { toast } = useToast();
 
   useEffect(() => {
@@ -20,6 +21,11 @@ const UserDashboard = () => {
       })
       .then(response => {
         setTeam(response.data);
+        // Fetch game invitations
+        return axios.get(`http://localhost:3005/games/invitations/${response.data._id}`);
+      })
+      .then(response => {
+        setGameInvitations(response.data);
       })
       .catch(err => {
         console.error('Error fetching data:', err);
@@ -45,6 +51,25 @@ const UserDashboard = () => {
         toast({
           title: "Error",
           description: `Error leaving team.`,
+          variant: "destructive",
+        });
+      });
+  };
+
+  const respondToGameInvitation = (gameId, response) => {
+    axios.post('http://localhost:3005/games/invitations/respond', { gameId, response })
+      .then(() => {
+        setGameInvitations(gameInvitations.filter(invitation => invitation._id !== gameId));
+        toast({
+          title: "Success",
+          description: `Game ${response} successfully.`,
+        });
+      })
+      .catch(err => {
+        console.error("Error responding to game invitation:", err);
+        toast({
+          title: "Error",
+          description: `Error responding to game invitation.`,
           variant: "destructive",
         });
       });
@@ -101,25 +126,55 @@ const UserDashboard = () => {
             <CardDescription>Your personalized dashboard</CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Display the user's team */}
-            {team ? (
-              <div className="mb-4">
+            <div className="flex flex-col md:flex-row gap-8">
+              {/* Team Information */}
+              {team ? (
+                <div className="w-full md:w-1/2 mb-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Your Team: {team.name}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p><strong>Team Owner:</strong> {team.owner.email}</p>
+                      <p><strong>Players:</strong> {team.players.map(player => player.email).join(', ')}</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button onClick={leaveTeam} variant="destructive">Leave Team</Button>
+                    </CardFooter>
+                  </Card>
+                </div>
+              ) : (
+                <p className="w-full md:w-1/2 mb-4">You are not part of a team.</p>
+              )}
+
+              {/* Game Invitations */}
+              <div className="w-full md:w-1/2">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Your Team: {team.name}</CardTitle>
+                    <CardTitle>Game Invitations</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p><strong>Team Owner:</strong> {team.owner.email}</p>
-                    <p><strong>Players:</strong> {team.players.map(player => player.email).join(', ')}</p>
+                    {gameInvitations.length > 0 ? (
+                      gameInvitations.map(invitation => (
+                        <div key={invitation._id} className="flex flex-col gap-4 mb-4 border p-4 rounded">
+                          <p><strong>Home Team:</strong> {invitation.homeTeam.name}</p>
+                          <p><strong>Away Team:</strong> {invitation.awayTeam.name}</p>
+                          <p><strong>Date:</strong> {new Date(invitation.date).toLocaleDateString()}</p>
+                          <p><strong>Time:</strong> {invitation.time}</p>
+                          <p><strong>Court:</strong> {invitation.court}</p>
+                          <div className="flex gap-2">
+                            <Button onClick={() => respondToGameInvitation(invitation._id, 'confirmed')}>Confirm</Button>
+                            <Button onClick={() => respondToGameInvitation(invitation._id, 'denied')} variant="destructive">Deny</Button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No game invitations.</p>
+                    )}
                   </CardContent>
-                  <CardFooter>
-                    <Button onClick={leaveTeam} variant="destructive">Leave Team</Button>
-                  </CardFooter>
                 </Card>
               </div>
-            ) : (
-              <p>You are not part of a team.</p>
-            )}
+            </div>
 
             {/* The Outlet renders the matched child route */}
             <Outlet />
