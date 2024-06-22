@@ -97,6 +97,23 @@ router.get('/user/:userId', async (req, res) => {
   }
 });
 
+
+router.delete('/:teamId', async (req, res) => {
+  try {
+    const { teamId } = req.params;
+    const deletedTeam = await teamModel.findByIdAndDelete(teamId);
+
+    if (!deletedTeam) {
+      return res.status(404).json({ error: 'Team not found' });
+    }
+
+    res.status(200).json({ message: 'Team deleted successfully', team: deletedTeam });
+  } catch (err) {
+    console.error("Error deleting team:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 // Fetch basic team information for a specific user
 router.get('/user-simple/:userId', async (req, res) => {
   try {
@@ -113,7 +130,8 @@ router.get('/user-simple/:userId', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const teams = await teamModel.find({});
+    const teams = await teamModel.find({})
+      .populate('players', 'email name'); // Populate players with email and name or any other required fields
     res.status(200).json(teams);
   } catch (err) {
     console.error("Error fetching teams:", err);

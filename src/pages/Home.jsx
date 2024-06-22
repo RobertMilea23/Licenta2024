@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Bar } from 'react-chartjs-2';
-import { format } from 'date-fns';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Button } from "@/components/ui/button";
 import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu";
-import { CardTitle, CardHeader, CardContent, Card } from "@/components/ui/card";
+import { CardTitle, CardHeader, CardContent, Card, CardDescription } from "@/components/ui/card";
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@/components/ui/table";
 
 // Register Chart.js components
@@ -22,52 +21,57 @@ const Home = () => {
   const [playerPositions, setPlayerPositions] = useState({});
 
   useEffect(() => {
-    axios.get('http://localhost:3005/players/countPlayers')
-      .then(result => {
-        setTotalPlayers(result.data.count);
-      })
-      .catch(err => {
-        console.log('Error fetching player count:', err);
-      });
-
-    axios.get('http://localhost:3005/teams/countTeams')
-      .then(result => {
-        setTotalTeams(result.data.count);
-      })
-      .catch(err => {
-        console.log('Error fetching team count:', err);
-      });
-
-    axios.get('http://localhost:3005/teams')
-      .then(result => {
-        setTeams(result.data);
-      })
-      .catch(err => {
-        console.log('Error fetching teams:', err);
-      });
-
-    axios.get('http://localhost:3005/games/all')
-      .then(result => {
-        setGames(result.data);
-      })
-      .catch(err => {
-        console.log('Error fetching games:', err);
-      });
-
-    axios.get('http://localhost:3005/players/all')
-      .then(result => {
-        const positions = result.data.reduce((acc, player) => {
-          acc[player.position] = (acc[player.position] || 0) + 1;
-          return acc;
-        }, {});
-        setPlayerPositions(positions);
-      })
-      .catch(err => {
-        console.log('Error fetching player positions:', err);
-      });
+    fetchData();
   }, []);
 
-  const upcomingGamesCount = games.length;
+  const fetchData = async () => {
+    try {
+      const playerCountResponse = await axios.get('http://localhost:3005/players/countPlayers');
+      setTotalPlayers(playerCountResponse.data.count);
+
+      const teamCountResponse = await axios.get('http://localhost:3005/teams/countTeams');
+      setTotalTeams(teamCountResponse.data.count);
+
+      const teamsResponse = await axios.get('http://localhost:3005/teams');
+      setTeams(teamsResponse.data);
+
+      const gamesResponse = await axios.get('http://localhost:3005/games/all');
+      setGames(gamesResponse.data);
+
+      const playersResponse = await axios.get('http://localhost:3005/players/all');
+      const positions = playersResponse.data.reduce((acc, player) => {
+        acc[player.position] = (acc[player.position] || 0) + 1;
+        return acc;
+      }, {});
+      setPlayerPositions(positions);
+    } catch (err) {
+      console.log('Error fetching data:', err);
+    }
+  };
+
+  const handleDeleteGame = async (gameId) => {
+    if (window.confirm("Are you sure you want to delete this game?")) {
+      try {
+        await axios.delete(`http://localhost:3005/games/${gameId}`);
+        setGames(games.filter(game => game._id !== gameId));
+      } catch (err) {
+        console.error("Error deleting game:", err);
+        alert("Failed to delete the game.");
+      }
+    }
+  };
+
+  const handleDeleteTeam = async (teamId) => {
+    if (window.confirm("Are you sure you want to delete this team? This action will remove the team and all its associated data.")) {
+      try {
+        await axios.delete(`http://localhost:3005/teams/${teamId}`);
+        setTeams(teams.filter(team => team._id !== teamId));
+      } catch (err) {
+        console.error("Error deleting team:", err);
+        alert("Failed to delete the team.");
+      }
+    }
+  };
 
   const data = {
     labels: Object.keys(playerPositions),
@@ -172,7 +176,7 @@ const Home = () => {
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{upcomingGamesCount}</div>
+              <div className="text-2xl font-bold">{games.length}</div>
             </CardContent>
           </Card>
           <Card x-chunk="dashboard-01-chunk-1">
@@ -225,23 +229,31 @@ const Home = () => {
                   <TableRow>
                     <TableHead>Home Team</TableHead>
                     <TableHead>Away Team</TableHead>
-                    <TableHead>Venue</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Time</TableHead>
+                    <TableHead className="text-right">Venue</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {games.map(game => (
                     <TableRow key={game._id}>
                       <TableCell>
-                        <div className="font-medium">{game.homeTeam ? game.homeTeam.name : 'error'}</div>
+                        <div className="font-medium">{game.homeTeam?.name || 'N/A'}</div>
                       </TableCell>
                       <TableCell>
-                        <div className="font-medium">{game.awayTeam ? game.awayTeam.name : 'Open'}</div>
+                        <div className="font-medium">{game.awayTeam?.name || 'N/A'}</div>
                       </TableCell>
-                      <TableCell>{game.court}</TableCell>
-                      <TableCell>{format(new Date(game.date), 'MMM dd, yyyy')}</TableCell>
-                      <TableCell>{game.time}</TableCell>
+                      <TableCell>
+                        <div className="font-medium">{game.date ? new Date(game.date).toLocaleDateString() : 'N/A'}</div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{game.time || 'N/A'}</div>
+                      </TableCell>
+                      <TableCell className="text-right">{game.court}</TableCell>
+                      <TableCell className="text-right">
+                        <Button size="sm" variant="destructive" onClick={() => handleDeleteGame(game._id)}>Delete</Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -259,10 +271,9 @@ const Home = () => {
                     <div className="grid gap-1">
                       <p className="text-sm font-medium leading-none">{team.name}</p>
                       <p className="text-sm text-muted-foreground">{team.description}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Players: {team.players.length > 0 ? team.players.map(player => player.email).join(', ') : 'No players'}
-                      </p>
+                      <p className="text-sm text-muted-foreground">Players: {team.players.map(player => player.email).join(', ')}</p>
                     </div>
+                    <Button size="sm" variant="destructive" onClick={() => handleDeleteTeam(team._id)}>Delete</Button>
                   </div>
                 ))
               ) : (
@@ -285,6 +296,7 @@ const Home = () => {
 };
 
 export default Home;
+
 
 function ArrowUpRightIcon(props) {
   return (
