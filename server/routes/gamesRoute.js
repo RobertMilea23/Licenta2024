@@ -19,18 +19,18 @@ router.get('/confirmed/:teamId', async (req, res) => {
   }
 });
 
-router.delete('/:gameId', async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
-    const { gameId } = req.params;
-    const deletedGame = await Game.findByIdAndDelete(gameId);
+    const { id } = req.params;
+    const deletedGame = await Game.findByIdAndDelete(id);
 
     if (!deletedGame) {
       return res.status(404).json({ error: 'Game not found' });
     }
 
-    res.status(200).json({ message: 'Game deleted successfully', game: deletedGame });
-  } catch (err) {
-    console.error("Error deleting game:", err);
+    res.status(200).json({ message: 'Game deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting game:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
