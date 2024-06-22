@@ -7,16 +7,10 @@ const Team = require('../models/Team');
 router.get('/confirmed/:teamId', async (req, res) => {
   try {
     const { teamId } = req.params;
-    if (!teamId) {
-      return res.status(400).json({ error: 'Invalid team ID' });
-    }
-
     const games = await Game.find({ 
       $or: [{ homeTeam: teamId }, { awayTeam: teamId }], 
       status: 'confirmed' 
-    })
-      .populate('homeTeam', 'name')
-      .populate('awayTeam', 'name');
+    }).populate('homeTeam', 'name').populate('awayTeam', 'name');
 
     res.status(200).json(games);
   } catch (err) {
@@ -32,8 +26,7 @@ router.get('/open/:teamId', async (req, res) => {
       awayTeam: null, 
       status: 'open', 
       homeTeam: { $ne: teamId } 
-    })
-      .populate('homeTeam', 'name');
+    }).populate('homeTeam', 'name');
       
     res.status(200).json(games);
   } catch (err) {

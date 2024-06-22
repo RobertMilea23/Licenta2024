@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Bar } from 'react-chartjs-2';
+import { format } from 'date-fns';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Button } from "@/components/ui/button";
 import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem, DropdownMenuContent, DropdownMenu } from "@/components/ui/dropdown-menu";
-import { CardTitle, CardHeader, CardContent, Card, CardDescription } from "@/components/ui/card";
+import { CardTitle, CardHeader, CardContent, Card } from "@/components/ui/card";
 import { TableHead, TableRow, TableHeader, TableCell, TableBody, Table } from "@/components/ui/table";
 
 // Register Chart.js components
@@ -224,19 +225,23 @@ const Home = () => {
                   <TableRow>
                     <TableHead>Home Team</TableHead>
                     <TableHead>Away Team</TableHead>
-                    <TableHead className="text-right">Venue</TableHead>
+                    <TableHead>Venue</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Time</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {games.map(game => (
                     <TableRow key={game._id}>
                       <TableCell>
-                        <div className="font-medium">error2</div>
+                        <div className="font-medium">{game.homeTeam ? game.homeTeam.name : 'error'}</div>
                       </TableCell>
                       <TableCell>
-                        <div className="font-medium">error1</div>
+                        <div className="font-medium">{game.awayTeam ? game.awayTeam.name : 'Open'}</div>
                       </TableCell>
-                      <TableCell className="text-right">{game.court}</TableCell>
+                      <TableCell>{game.court}</TableCell>
+                      <TableCell>{format(new Date(game.date), 'MMM dd, yyyy')}</TableCell>
+                      <TableCell>{game.time}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -254,7 +259,9 @@ const Home = () => {
                     <div className="grid gap-1">
                       <p className="text-sm font-medium leading-none">{team.name}</p>
                       <p className="text-sm text-muted-foreground">{team.description}</p>
-                      <p className="text-sm text-muted-foreground">Players: {team.players.map(player => player.name).join(', ')}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Players: {team.players.length > 0 ? team.players.map(player => player.email).join(', ') : 'No players'}
+                      </p>
                     </div>
                   </div>
                 ))
@@ -279,7 +286,6 @@ const Home = () => {
 
 export default Home;
 
-
 function ArrowUpRightIcon(props) {
   return (
     <svg
@@ -299,7 +305,6 @@ function ArrowUpRightIcon(props) {
     </svg>
   )
 }
-
 
 function CalendarIcon(props) {
   return (
@@ -323,7 +328,6 @@ function CalendarIcon(props) {
   )
 }
 
-
 function MenuIcon(props) {
   return (
     <svg
@@ -345,7 +349,6 @@ function MenuIcon(props) {
   )
 }
 
-
 function SearchIcon(props) {
   return (
     <svg
@@ -366,17 +369,12 @@ function SearchIcon(props) {
   )
 }
 
-
 function ShoppingBasketIcon(props) {
   return (
     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M7.07926 0.222253C7.31275 -0.007434 7.6873 -0.007434 7.92079 0.222253L14.6708 6.86227C14.907 7.09465 14.9101 7.47453 14.6778 7.71076C14.4454 7.947 14.0655 7.95012 13.8293 7.71773L13 
-      6.90201V12.5C13 12.7761 12.7762 13 12.5 13H2.50002C2.22388 13 2.00002 12.7761 2.00002 12.5V6.90201L1.17079 7.71773C0.934558 7.95012 0.554672 7.947 0.32229 7.71076C0.0899079 7.47453 0.0930283 
-      7.09465 0.32926 6.86227L7.07926 0.222253ZM7.50002 1.49163L12 5.91831V12H10V8.49999C10 8.22385 9.77617 7.99999 9.50002 7.99999H6.50002C6.22388 7.99999 6.00002 8.22385 6.00002 8.49999V12H3.000
-      02V5.91831L7.50002 1.49163ZM7.00002 12H9.00002V8.99999H7.00002V12Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
+      <path d="M7.07926 0.222253C7.31275 -0.007434 7.6873 -0.007434 7.92079 0.222253L14.6708 6.86227C14.907 7.09465 14.9101 7.47453 14.6778 7.71076C14.4454 7.947 14.0655 7.95012 13.8293 7.71773L13 6.90201V12.5C13 12.7761 12.7762 13 12.5 13H2.50002C2.22388 13 2.00002 12.7761 2.00002 12.5V6.90201L1.17079 7.71773C0.934558 7.95012 0.554672 7.947 0.32229 7.71076C0.0899079 7.47453 0.0930283 7.09465 0.32926 6.86227L7.07926 0.222253ZM7.50002 1.49163L12 5.91831V12H10V8.49999C10 8.22385 9.77617 7.99999 9.50002 7.99999H6.50002C6.22388 7.99999 6.00002 8.22385 6.00002 8.49999V12H3.00002V5.91831L7.50002 1.49163ZM7.00002 12H9.00002V8.99999H7.00002V12Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path></svg>
   )
 }
-
 
 function UserCircleIcon(props) {
   return (
@@ -399,7 +397,6 @@ function UserCircleIcon(props) {
   )
 }
 
-
 function UsersIcon(props) {
   return (
     <svg
@@ -421,4 +418,3 @@ function UsersIcon(props) {
     </svg>
   )
 }
-

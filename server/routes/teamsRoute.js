@@ -122,6 +122,17 @@ router.get('/', async (req, res) => {
 });
 
 
+router.get('/countTeams', async (req, res) => {
+  try {
+    const count = await teamModel.countDocuments();
+    res.status(200).json({ count });
+  } catch (err) {
+    console.error("Error counting teams:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 
 // Leave team
 router.post('/leave-team', async (req, res) => {
