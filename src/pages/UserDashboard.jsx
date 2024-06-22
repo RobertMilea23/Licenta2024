@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, Link, Outlet } from 'react-router-dom';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/components/ui/use-toast';
@@ -10,77 +10,41 @@ const UserDashboard = () => {
   const { userId } = useParams();
   const [user, setUser] = useState(null);
   const [team, setTeam] = useState(null);
-  const [confirmedGames, setConfirmedGames] = useState([]);
-  const [invitations, setInvitations] = useState([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Fetch user information
     axios.get(`http://localhost:3005/users/${userId}`)
       .then(response => {
         setUser(response.data);
-        // Fetch the user's team
         return axios.get(`http://localhost:3005/teams/user/${userId}`);
       })
       .then(response => {
         setTeam(response.data);
       })
       .catch(err => {
-        console.error('Error fetching user or team:', err);
+        console.error('Error fetching data:', err);
         toast({
           title: 'Error fetching data',
-          description: 'There was an error fetching the user or team data. Please try again later.',
+          description: 'There was an error fetching the data. Please try again later.',
           variant: 'destructive',
         });
       });
   }, [userId, toast]);
 
-  useEffect(() => {
-    if (team) {
-      // Fetch confirmed games for the user's team
-      axios.get(`http://localhost:3005/games/confirmed/${team._id}`)
-        .then(response => {
-          setConfirmedGames(response.data);
-        })
-        .catch(err => {
-          console.error('Error fetching confirmed games:', err);
-          toast({
-            title: 'Error fetching confirmed games',
-            description: 'There was an error fetching confirmed games. Please try again later.',
-            variant: 'destructive',
-          });
-        });
-
-      // Fetch game invitations for the user's team
-      axios.get(`http://localhost:3005/games/invitations/${team._id}`)
-        .then(response => {
-          setInvitations(response.data);
-        })
-        .catch(err => {
-          console.error('Error fetching game invitations:', err);
-          toast({
-            title: 'Error fetching game invitations',
-            description: 'There was an error fetching game invitations. Please try again later.',
-            variant: 'destructive',
-          });
-        });
-    }
-  }, [team, toast]);
-
-  const handleResponse = (gameId, response) => {
-    axios.post('http://localhost:3005/games/invitations/respond', { gameId, response })
+  const leaveTeam = () => {
+    axios.post('http://localhost:3005/teams/leave-team', { userId })
       .then(() => {
-        setInvitations(invitations.filter(invitation => invitation._id !== gameId));
+        setTeam(null);
         toast({
           title: "Success",
-          description: `Game ${response} successfully.`,
+          description: "You have left the team.",
         });
       })
       .catch(err => {
-        console.error("Error responding to game invitation:", err);
+        console.error("Error leaving team:", err);
         toast({
           title: "Error",
-          description: `Error responding to game invitation.`,
+          description: `Error leaving team.`,
           variant: "destructive",
         });
       });
@@ -138,56 +102,29 @@ const UserDashboard = () => {
           </CardHeader>
           <CardContent>
             {/* Display the user's team */}
-            {team && (
+            {team ? (
               <div className="mb-4">
-                <h2 className="text-xl font-semibold">Your Team: {team.name}</h2>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Your Team: {team.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p><strong>Team Owner:</strong> {team.owner.email}</p>
+                    <p><strong>Players:</strong> {team.players.map(player => player.email).join(', ')}</p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={leaveTeam} variant="destructive">Leave Team</Button>
+                  </CardFooter>
+                </Card>
               </div>
-            )}
-
-            {/* Display game invitations */}
-            {invitations.length > 0 && (
-              <div className="mb-4">
-                <h2 className="text-xl font-semibold">Game Invitations</h2>
-                {invitations.map(invitation => (
-                  <div key={invitation._id} className="flex flex-col gap-4 mb-4 border p-4 rounded">
-                    <p><strong>Home Team:</strong> {invitation.homeTeam.name}</p>
-                    <p><strong>Away Team:</strong> {invitation.awayTeam.name}</p>
-                    <p><strong>Date:</strong> {new Date(invitation.date).toLocaleDateString()}</p>
-                    <p><strong>Time:</strong> {invitation.time}</p>
-                    <p><strong>Court:</strong> {invitation.court}</p>
-                    <div className="flex gap-2">
-                      <Button onClick={() => handleResponse(invitation._id, 'confirmed')}>Confirm</Button>
-                      <Button onClick={() => handleResponse(invitation._id, 'denied')} variant="destructive">Deny</Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            ) : (
+              <p>You are not part of a team.</p>
             )}
 
             {/* The Outlet renders the matched child route */}
             <Outlet />
           </CardContent>
         </Card>
-
-        {/* Display confirmed games */}
-        {confirmedGames.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold">Confirmed Games</h2>
-            <div className="space-y-4">
-              {confirmedGames.map(game => (
-                <Card key={game._id} className="p-4">
-                  <CardHeader>
-                    <CardTitle>{game.homeTeam.name} vs {game.awayTeam.name}</CardTitle>
-                    <CardDescription>{new Date(game.date).toLocaleDateString()} at {game.time}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p><strong>Venue:</strong> {game.court}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        )}
       </main>
     </div>
   );

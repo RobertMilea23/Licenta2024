@@ -10,6 +10,7 @@ import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const UserGames = () => {
   const { userId } = useParams();
@@ -22,6 +23,7 @@ const UserGames = () => {
   const [court, setCourt] = useState('');
   const [courts, setCourts] = useState([]);
   const [unavailableTimes, setUnavailableTimes] = useState([]);
+  const [confirmedGames, setConfirmedGames] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,12 +50,18 @@ const UserGames = () => {
 
         // Filter out the user's team from the list of teams available for away team
         setTeams(prevTeams => prevTeams.filter(team => team._id !== userTeam._id));
+
+        // Fetch confirmed games for user's team
+        return axios.get(`http://localhost:3005/games/confirmed/${userTeam._id}`);
+      })
+      .then(response => {
+        setConfirmedGames(response.data);
       })
       .catch(err => {
-        console.error("Error fetching user's team:", err);
+        console.error("Error fetching data:", err);
         toast({
           title: "Error",
-          description: "Could not fetch user's team.",
+          description: "Could not fetch user's team or confirmed games.",
           variant: "destructive",
         });
       });
@@ -65,7 +73,7 @@ const UserGames = () => {
         setCourts(data);
       })
       .catch(err => console.error("Error fetching courts:", err));
-  }, [userId]);
+  }, [userId, toast]);
 
   const fetchUnavailableTimes = (selectedDate) => {
     const formattedDate = selectedDate.toISOString().split('T')[0];
@@ -134,8 +142,8 @@ const UserGames = () => {
         </nav>
       </header>
 
-      <div className="flex-1 p-4 md:p-6 lg:p-8 flex justify-center items-center">
-        <Card className="w-[600px] h-auto">
+      <div className="flex-1 p-4 md:p-6 lg:p-8 flex flex-col items-center">
+        <Card className="w-[600px] mb-8">
           <CardHeader>
             <CardTitle>Create a Game</CardTitle>
           </CardHeader>
@@ -208,6 +216,41 @@ const UserGames = () => {
               </div>
               <Button className="w-full" type='submit'>Create Game</Button>
             </form>
+          </CardContent>
+        </Card>
+
+        {/* Confirmed Games Section */}
+        <Card className="w-full max-w-[600px]">
+          <CardHeader>
+            <CardTitle>Confirmed Games</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {confirmedGames.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Home Team</TableHead>
+                    <TableHead>Away Team</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Time</TableHead>
+                    <TableHead>Court</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {confirmedGames.map(game => (
+                    <TableRow key={game._id}>
+                      <TableCell>{game.homeTeam.name}</TableCell>
+                      <TableCell>{game.awayTeam.name}</TableCell>
+                      <TableCell>{format(new Date(game.date), 'PPP')}</TableCell>
+                      <TableCell>{game.time}</TableCell>
+                      <TableCell>{game.court}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p>No confirmed games.</p>
+            )}
           </CardContent>
         </Card>
       </div>
