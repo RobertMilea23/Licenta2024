@@ -6,13 +6,13 @@ import Home from './pages/Home';
 import Games from './pages/Games';
 import Teams from './pages/Teams';
 import Players from './pages/Players';
-import Stats from './pages/Stats';
+
 import ProtectedRoute from './components/ui/ProtectedRoute';
 import UserDashboard from './pages/UserDashboard';
 import UserGames from './pages/UserGames';
 import UserTeams from './pages/UserTeams';
 import UserEditPlayer from './pages/UserEditPlayer';
-import UserStats from './pages/UserStats';
+
 
 const App = () => {
   return (
@@ -25,14 +25,14 @@ const App = () => {
         <Route path='/Games' element={<Games />} />
         <Route path='/Teams' element={<Teams />} />
         <Route path='/Players' element={<Players />} />
-        <Route path='/Stats' element={<Stats />} />
+      
       </Route>
       <Route element={<ProtectedRoute role="user" />}>
         <Route path='/UserDashboard/:userId' element={<UserDashboard />}>
           <Route path='Games' element={<UserGames />} />
           <Route path='Teams' element={<UserTeams />} />
           <Route path='EditPlayer' element={<UserEditPlayer />} />
-          <Route path='Stats' element={<UserStats />} />
+        
         </Route>
       </Route>
     </Routes>
