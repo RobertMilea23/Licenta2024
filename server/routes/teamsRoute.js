@@ -5,6 +5,20 @@ const invitationModel = require('../models/Invitation');
 const userModel = require('../models/User'); // Import the userModel
 const playerModel = require('../models/Player');
 
+
+
+router.get('/', async (req, res) => {
+  try {
+    const teams = await teamModel.find().populate('players', 'email name'); // Populate players with email and name or any other required fields
+    res.status(200).json(teams);
+  } catch (err) {
+    console.error("Error fetching teams:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
 // Send invitations to create or update a team
 router.post('/send-invitations', async (req, res) => {
   const { teamName, ownerId, playerIds } = req.body;
