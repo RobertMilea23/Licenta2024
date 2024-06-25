@@ -145,20 +145,7 @@ const UserTeams = () => {
           </Button>
         </CardFooter>
       </Card>
-      {team && (
-        <div className="mt-8 w-[600px]">
-          <h2>Your Team</h2>
-          <p>Team Name: {team.name}</p>
-          <p>Team Owner: {team.owner.email}</p>
-          <h3>Players</h3>
-          <ul>
-            {team.players.map(player => (
-              <li key={player._id}>{player.email}</li>
-            ))}
-          </ul>
-          <Button variant="destructive" onClick={handleLeaveTeam}>Leave Team</Button>
-        </div>
-      )}
+     
       <div className="mt-8 w-[600px]">
         <h2>Invitations</h2>
         <ul>
