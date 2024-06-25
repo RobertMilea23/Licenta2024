@@ -31,6 +31,10 @@ const UserTeams = () => {
           console.error('Error fetching team:', err);
         }
       });
+
+    axios.get('http://localhost:3005/teams/available-players')
+      .then(response => setPlayers(response.data))
+      .catch(err => console.error('Error fetching available players:', err));
   }, [userId]);
 
   const handleSearch = (e) => {
@@ -38,6 +42,10 @@ const UserTeams = () => {
   };
 
   const handleInvite = (player) => {
+    if (team && team.players.length + invitedPlayers.length >= 3) {
+      alert('A team cannot have more than 3 players.');
+      return;
+    }
     setInvitedPlayers([...invitedPlayers, player]);
   };
 
@@ -46,11 +54,13 @@ const UserTeams = () => {
   };
 
   const handleSendInvitations = () => {
-    axios.post('http://localhost:3005/teams/send-invitations', {
-      teamName,
+    const teamData = {
+      teamName: team ? team.name : teamName,
       ownerId: userId,
       playerIds: invitedPlayers.map(player => player.userId) // Ensure correct userId is sent
-    })
+    };
+
+    axios.post('http://localhost:3005/teams/send-invitations', teamData)
       .then(response => {
         console.log(response.data.message);
         setTeam(response.data.team);
@@ -91,7 +101,8 @@ const UserTeams = () => {
 
   const filteredPlayers = players.filter(player =>
     player.name.toLowerCase().includes(searchTerm.toLowerCase())
-  ).filter(player => !team || !team.players.some(p => p._id === player._id));
+  ).filter(player => !team || !team.players.some(p => p._id === player._id))
+  .filter(player => player.userId !== userId);
 
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center">
@@ -105,7 +116,7 @@ const UserTeams = () => {
               <Label htmlFor="teamName">Team Name</Label>
               <Input
                 id="teamName"
-                value={teamName}
+                value={team ? team.name : teamName}
                 onChange={(e) => setTeamName(e.target.value)}
                 placeholder="Enter team name"
                 disabled={!!team} // Disable if team is created
@@ -120,7 +131,7 @@ const UserTeams = () => {
               {filteredPlayers.map(player => (
                 <div key={player._id} className="flex justify-between items-center p-2 border-b">
                   <span>{player.name}</span>
-                  <Button onClick={() => handleInvite(player)} disabled={invitedPlayers.includes(player) || !!team}>
+                  <Button onClick={() => handleInvite(player)} disabled={invitedPlayers.includes(player)}>
                     Invite
                   </Button>
                 </div>
@@ -140,12 +151,12 @@ const UserTeams = () => {
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={handleSendInvitations} disabled={!teamName || invitedPlayers.length === 0 || !!team}>
+          <Button onClick={handleSendInvitations} disabled={invitedPlayers.length === 0}>
             Send Invitations
           </Button>
         </CardFooter>
       </Card>
-     
+
       <div className="mt-8 w-[600px]">
         <h2>Invitations</h2>
         <ul>
