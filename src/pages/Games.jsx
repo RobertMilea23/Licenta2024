@@ -137,9 +137,7 @@ const Games = () => {
           <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Players">
             Players
           </Link>
-          <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Stats">
-            Stats
-          </Link>
+    
         </nav>
       </header>
 

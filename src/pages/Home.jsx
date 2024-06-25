@@ -19,9 +19,11 @@ const Home = () => {
   const [teams, setTeams] = useState([]);
   const [games, setGames] = useState([]);
   const [playerPositions, setPlayerPositions] = useState({});
+  const [weather, setWeather] = useState(null); // State to hold weather data
 
   useEffect(() => {
     fetchData();
+    fetchWeatherData(); // Fetch weather data on component mount
   }, []);
 
   const fetchData = async () => {
@@ -46,6 +48,17 @@ const Home = () => {
       setPlayerPositions(positions);
     } catch (err) {
       console.log('Error fetching data:', err);
+    }
+  };
+
+  const fetchWeatherData = async () => {
+    try {
+      const apiKey = 'YOUR_WEATHER_API_KEY'; // Replace with your weather API key
+      const city = 'Bucharest'; // Replace with desired city
+      const weatherResponse = await  axios.get('https://api.openweathermap.org/data/2.5/weather?q=Bucharest&appid=ce598a0fbeb108dc85d556c8005264c7&units=metric')
+      setWeather(weatherResponse.data);
+    } catch (err) {
+      console.log('Error fetching weather data:', err);
     }
   };
 
@@ -104,9 +117,7 @@ const Home = () => {
           <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Players">
             Players
           </Link>
-          <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Stats">
-            Stats
-          </Link>
+         
         </nav>
         <Sheet>
           <SheetTrigger asChild>
@@ -201,12 +212,19 @@ const Home = () => {
           </Card>
           <Card x-chunk="dashboard-01-chunk-3">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Attendance</CardTitle>
-              <UsersIcon className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Current Weather</CardTitle>
+              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">8,573</div>
-              <p className="text-xs text-muted-foreground">Total attendance</p>
+              {weather ? (
+                <>
+                  <div className="text-2xl font-bold">{weather.main.temp}°C</div>
+                  <p className="text-xs text-muted-foreground">Location: {weather.name}</p>
+                  <p className="text-xs text-muted-foreground">Condition: {weather.weather[0].description}</p>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground">Fetching weather data...</p>
+              )}
             </CardContent>
           </Card>
         </div>

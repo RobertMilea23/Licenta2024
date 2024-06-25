@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const userModel = require('../models/User');
 
-// Login route
-// Login route
 router.post('/Login', (req, res) => {
     const { email, password } = req.body;
   
@@ -30,8 +28,6 @@ router.post('/Login', (req, res) => {
   });
   
 
-// Register route
-// Register route
 router.post('/Register', (req, res) => {
     const { email, password, confirmPass } = req.body;
   

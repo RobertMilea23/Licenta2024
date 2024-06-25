@@ -170,4 +170,17 @@ router.get('/available-players', async (req, res) => {
   }
 });
 
+//countTeams
+
+router.get('/countTeams', async (req, res) => {
+  try {
+    const count = await teamModel.countDocuments();
+    res.status(200).json({ count });
+  } catch (err) {
+    console.error("Error fetching teams:", err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
 module.exports = router;

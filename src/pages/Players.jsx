@@ -44,9 +44,7 @@ const Players = () => {
           <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Players">
             Players
           </Link>
-          <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Stats">
-            Stats
-          </Link>
+        
         </nav>
 
         <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
