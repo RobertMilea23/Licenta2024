@@ -19,11 +19,11 @@ const Home = () => {
   const [teams, setTeams] = useState([]);
   const [games, setGames] = useState([]);
   const [playerPositions, setPlayerPositions] = useState({});
-  const [weather, setWeather] = useState(null); // State to hold weather data
+  const [weather, setWeather] = useState(null); 
 
   useEffect(() => {
     fetchData();
-    fetchWeatherData(); // Fetch weather data on component mount
+    fetchWeatherData(); 
   }, []);
 
   const fetchData = async () => {
@@ -53,8 +53,7 @@ const Home = () => {
 
   const fetchWeatherData = async () => {
     try {
-      const apiKey = 'YOUR_WEATHER_API_KEY'; // Replace with your weather API key
-      const city = 'Bucharest'; // Replace with desired city
+
       const weatherResponse = await  axios.get('https://api.openweathermap.org/data/2.5/weather?q=Bucharest&appid=ce598a0fbeb108dc85d556c8005264c7&units=metric')
       setWeather(weatherResponse.data);
     } catch (err) {
