@@ -18,21 +18,18 @@ router.get('/all', async (req, res) => {
   }
 });
 
-// Create or update player for a user
 router.put('/createOrUpdate', async (req, res) => {
   const { userId, name, position, height } = req.body;
 
   try {
     let player = await playerModel.findOne({ userId });
     if (player) {
-      // Update existing player
       player.name = name;
       player.position = position;
       player.height = height;
       await player.save();
       res.json(player);
     } else {
-      // Create new player
       player = new playerModel({ userId, name, position, height });
       await player.save();
       res.json(player);

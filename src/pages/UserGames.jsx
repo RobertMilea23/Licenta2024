@@ -42,22 +42,23 @@ const UserGames = () => {
         });
       });
   
-    // Fetch user's team and their confirmed games
-    let userTeam; // Declare userTeam in the correct scope
+   
+    let userTeam; 
+
     axios.get(`http://localhost:3005/teams/user/${userId}`)
       .then(response => {
-        userTeam = response.data; // Assign userTeam correctly
+        userTeam = response.data; 
         setHomeTeam(userTeam._id);
         setHomeTeamName(userTeam.name);
         setTeams(prevTeams => prevTeams.filter(team => team._id !== userTeam._id));
   
-        // Fetch confirmed games for user's team
+       
         return axios.get(`http://localhost:3005/games/confirmed/${userTeam._id}`);
       })
       .then(response => {
         setConfirmedGames(response.data);
   
-        // Fetch open games, excluding those created by the user's team
+       
         return axios.get(`http://localhost:3005/games/open/${userTeam._id}`);
       })
       .then(response => {
@@ -72,7 +73,6 @@ const UserGames = () => {
         });
       });
   
-    // Fetch courts
     fetch('/courts.json')
       .then(response => response.json())
       .then(data => {

@@ -35,6 +35,8 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+
+
 router.get('/open/:teamId', async (req, res) => {
   try {
     const { teamId } = req.params;
@@ -51,7 +53,7 @@ router.get('/open/:teamId', async (req, res) => {
   }
 });
 
-// Fetch game invitations for a team
+
 router.get('/invitations/:teamId', async (req, res) => {
   try {
     const games = await Game.find({ awayTeam: req.params.teamId, status: 'pending' })
@@ -64,7 +66,6 @@ router.get('/invitations/:teamId', async (req, res) => {
   }
 });
 
-// Handle game invitation response
 router.post('/invitations/respond', async (req, res) => {
   const { gameId, response } = req.body;
 
