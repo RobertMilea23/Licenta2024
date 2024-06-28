@@ -123,7 +123,7 @@ router.post('/leave-team', async (req, res) => {
   }
 });
 
-// Fetch all players who are not part of any team
+
 router.get('/available-players', async (req, res) => {
   try {
     const playersInTeams = await teamModel.distinct('players');
@@ -135,7 +135,7 @@ router.get('/available-players', async (req, res) => {
   }
 });
 
-// Count teams
+
 router.get('/countTeams', async (req, res) => {
   try {
     const count = await teamModel.countDocuments();

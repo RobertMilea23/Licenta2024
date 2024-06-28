@@ -24,11 +24,11 @@ const UserGames = () => {
   const [courts, setCourts] = useState([]);
   const [unavailableTimes, setUnavailableTimes] = useState([]);
   const [confirmedGames, setConfirmedGames] = useState([]);
-  const [openGames, setOpenGames] = useState([]); // State for open games
+  const [openGames, setOpenGames] = useState([]); 
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch all teams
+  
     axios.get('http://localhost:3005/teams')
       .then(response => {
         setTeams(response.data);
@@ -211,7 +211,7 @@ const UserGames = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {teams
-                        .filter(team => team._id !== homeTeam) // Exclude home team from list
+                        .filter(team => team._id !== homeTeam) 
                         .map(team => (
                           <SelectItem key={team._id} value={team._id}>{team.name}</SelectItem>
                         ))}

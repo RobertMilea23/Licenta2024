@@ -90,7 +90,7 @@ router.post('/invitations/respond', async (req, res) => {
   }
 });
 
-// Accept open game
+
 router.post('/accept-open', async (req, res) => {
   try {
     const { gameId, teamId } = req.body;
@@ -104,7 +104,7 @@ router.post('/accept-open', async (req, res) => {
       return res.status(400).json({ error: 'Game already has an away team' });
     }
 
-    // Ensure that the accepting team is not the same as the home team
+
     if (game.homeTeam.toString() === teamId) {
       return res.status(400).json({ error: 'Home team cannot accept its own open game' });
     }
@@ -120,7 +120,7 @@ router.post('/accept-open', async (req, res) => {
   }
 });
 
-// Decline open game
+
 router.post('/decline-open', async (req, res) => {
   try {
     const { gameId } = req.body;
@@ -140,7 +140,7 @@ router.post('/decline-open', async (req, res) => {
   }
 });
 
-// Helper function to check for time conflicts
+
 const isTimeConflict = (existingTime, newTime) => {
   const [existingHour, existingMinute] = existingTime.split(':').map(Number);
   const [newHour, newMinute] = newTime.split(':').map(Number);
