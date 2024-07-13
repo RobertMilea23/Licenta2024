@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
-import { format } from "date-fns";
+import { format, isBefore, startOfToday } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -24,11 +24,10 @@ const UserGames = () => {
   const [courts, setCourts] = useState([]);
   const [unavailableTimes, setUnavailableTimes] = useState([]);
   const [confirmedGames, setConfirmedGames] = useState([]);
-  const [openGames, setOpenGames] = useState([]); 
+  const [openGames, setOpenGames] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-  
     axios.get('http://localhost:3005/teams')
       .then(response => {
         setTeams(response.data);
@@ -42,23 +41,20 @@ const UserGames = () => {
         });
       });
   
-   
-    let userTeam; 
+    let userTeam;
 
     axios.get(`http://localhost:3005/teams/user/${userId}`)
       .then(response => {
-        userTeam = response.data; 
+        userTeam = response.data;
         setHomeTeam(userTeam._id);
         setHomeTeamName(userTeam.name);
         setTeams(prevTeams => prevTeams.filter(team => team._id !== userTeam._id));
-  
-       
+
         return axios.get(`http://localhost:3005/games/confirmed/${userTeam._id}`);
       })
       .then(response => {
         setConfirmedGames(response.data);
-  
-       
+
         return axios.get(`http://localhost:3005/games/open/${userTeam._id}`);
       })
       .then(response => {
@@ -72,7 +68,7 @@ const UserGames = () => {
           variant: "destructive",
         });
       });
-  
+
     fetch('/courts.json')
       .then(response => response.json())
       .then(data => {
@@ -82,6 +78,7 @@ const UserGames = () => {
   }, [userId, toast]);
 
   const fetchUnavailableTimes = (selectedDate) => {
+    if (!selectedDate) return;
     const formattedDate = selectedDate.toISOString().split('T')[0];
     axios.get(`http://localhost:3005/games/date/${formattedDate}`)
       .then(response => {
@@ -91,8 +88,16 @@ const UserGames = () => {
   };
 
   const handleDateChange = (selectedDate) => {
-    setDate(selectedDate);
-    fetchUnavailableTimes(selectedDate);
+    if (selectedDate && !isBefore(selectedDate, startOfToday())) {
+      setDate(selectedDate);
+      fetchUnavailableTimes(selectedDate);
+    } else {
+      toast({
+        title: "Invalid Date",
+        description: "Please select a future date.",
+        variant: "destructive",
+      });
+    }
   };
 
   const isTimeAvailable = (time) => {
@@ -109,6 +114,21 @@ const UserGames = () => {
       return `${hours + 1}:00`;
     }
     return `${hours}:${newMinutes}`;
+  };
+
+  const isDateDisabled = (date) => isBefore(date, startOfToday());
+
+  const isTimeDisabled = (selectedTime) => {
+    if (!date) return true;
+    const now = new Date();
+    const selectedDate = new Date(date);
+    selectedDate.setHours(...selectedTime.split(':').map(Number), 0, 0);
+
+    if (isBefore(selectedDate, now)) {
+      return true;
+    }
+
+    return !isTimeAvailable(selectedTime);
   };
 
   const handleSubmit = (event) => {
@@ -211,7 +231,7 @@ const UserGames = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {teams
-                        .filter(team => team._id !== homeTeam) 
+                        .filter(team => team._id !== homeTeam)
                         .map(team => (
                           <SelectItem key={team._id} value={team._id}>{team.name}</SelectItem>
                         ))}
@@ -227,7 +247,13 @@ const UserGames = () => {
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={date} onSelect={handleDateChange} initialFocus />
+                      <Calendar 
+                        mode="single" 
+                        selected={date} 
+                        onSelect={handleDateChange} 
+                        initialFocus 
+                        disabled={isDateDisabled} // Disable past dates
+                      />
                     </PopoverContent>
                   </Popover>
                 </div>
@@ -239,7 +265,7 @@ const UserGames = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00'].map(time => (
-                        <SelectItem key={time} value={time} disabled={!isTimeAvailable(time)}>{time}</SelectItem>
+                        <SelectItem key={time} value={time} disabled={isTimeDisabled(time)}>{time}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -263,7 +289,6 @@ const UserGames = () => {
           </CardContent>
         </Card>
 
-        {/* Confirmed Games Section */}
         <Card className="w-full max-w-[600px] mb-8">
           <CardHeader>
             <CardTitle>Confirmed Games</CardTitle>
@@ -298,7 +323,6 @@ const UserGames = () => {
           </CardContent>
         </Card>
 
-        {/* Open Games Section */}
         <Card className="w-full max-w-[600px]">
           <CardHeader>
             <CardTitle>Open Games</CardTitle>
