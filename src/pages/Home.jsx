@@ -107,15 +107,7 @@ const Home = () => {
           <Link className="text-foreground transition-colors hover:text-foreground" to="/Home">
             Dashboard
           </Link>
-          <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Games">
-            Games
-          </Link>
-          <Link className="text-muted-foreground transition-colors hover:text-foreground" to='/Teams'>
-            Teams
-          </Link>
-          <Link className="text-muted-foreground transition-colors hover:text-foreground" to="/Players">
-            Players
-          </Link>
+        
          
         </nav>
         <Sheet>

@@ -48,9 +48,14 @@ router.post('/Register', (req, res) => {
   });
   
 
-// Get user by ID route
-router.get('/:userId', (req, res) => {
+  router.get('/:userId', (req, res) => {
     const { userId } = req.params;
+
+  
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ error: 'Invalid user ID format' });
+    }
+
     userModel.findById(userId)
         .then(user => {
             if (user) {
